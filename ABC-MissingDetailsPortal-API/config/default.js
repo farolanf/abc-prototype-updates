@@ -87,7 +87,7 @@ module.exports = {
       CERTIFICATE: path.join(__dirname, '../test/cert-file.crt')
     },
     IDENTITY_PROVIDER: {
-      SSO_LOGIN_URL: 'http://cp:7000/saml/sso',
+      SSO_LOGIN_URL: 'http://JINANW:7000/saml/sso',
       CERTIFICATE: path.join(__dirname, '../test/cert-file.crt')
     }
   }
