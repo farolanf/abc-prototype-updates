@@ -1,0 +1,405 @@
+@import "../../styles/imports";
+
+// table-section
+.table-section {
+  display: block;
+
+  .query-col {
+    border-right: 1px solid $silver;
+
+    .query-val {
+      display: block;
+      height: 17px;
+    }
+  }
+
+  .action-col {
+    align-items: center;
+    display: flex;
+    border-left: solid 1px $silver;
+
+    .more {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: url("../../i/more.svg") 0 0 no-repeat;
+      background-size: 16px;
+    }
+
+    .toogle-expand {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      background: url("../../i/toogle-arrow.svg") 0 0 no-repeat;
+      background-size: 16px;
+      margin-left: 11px;
+    }
+  }
+
+  // tbody
+  .tbody {
+    .tr:nth-child(even) {
+      background-color: rgba($silver, 0.3);
+    }
+  }
+
+  .radio-ctrl {
+    height: 17px;
+
+    .radio-label {
+      padding-left: 0;
+      position: relative;
+
+      &:before {
+        top: 0;
+      }
+    }
+  }
+
+  .query-col {
+    .radio-ctrl {
+      visibility: hidden;
+    }
+
+    .query-val {
+      &.selectable {
+        .radio-ctrl {
+          visibility: visible;
+        }
+      }
+    }
+  }
+
+
+  .link-edit{
+    background: url('../../i/pencil.svg') 0 0 no-repeat;
+    background-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin: 0 8px 0 0;
+  }
+
+  .link-delete{
+    background: url('../../i/trash.svg') 0 0 no-repeat;
+    background-size: auto 16px;
+    width: 16px;
+    height: 16px;
+    margin: 0 8px;
+  }
+}
+
+// table-container styles
+.table-container {
+  display: flex;
+  
+
+  // side by side table layout
+  .table-lt {
+    flex: 0 94px;
+  }
+
+  .table-mid {
+    flex: 1;
+    overflow: auto;
+  }
+
+  .table-rt {
+    flex: 0 69px;
+
+    &.has-line{
+      .th, .tr{
+        border-left: 1px solid $silver;
+      }
+    }
+  }
+
+  .table {
+    .thead {
+      background-color: $duck-egg-blue;
+    }
+  }
+
+  .tr {
+    display: flex;
+    min-height: 40px;
+    position: relative;
+
+    &.select-col{
+      min-height: 45px;
+      padding-top: 8px;
+       padding-left: 9px;
+      min-width: 90px;
+    }
+
+   &.val-status{
+     position: relative;
+     &:before{
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 5px;
+     }
+
+     &.New{
+       &:before{
+        background: $greenblue;
+       }
+     }
+     &.Open{
+       &:before{
+        background: $rich-electric-blue;
+       }
+     }
+     &.Rejected{
+       &:before{
+        background: $dusty-orange;
+       }
+     }
+     &.Closed{
+       &:before{
+        background: $steel-grey;
+       }
+     }
+   }
+
+    .th {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      line-height: 16px;
+      text-align: left;
+      color: $black;
+      max-height: 40px;
+      overflow: hidden;
+
+      &.align-center {
+        justify-content: center;
+      }
+      &.disabled{
+        display: none;
+      }
+    }
+
+    .td {
+      padding: 14px 0 4px 10px;
+      font-size: 12px;
+      line-height: 16px;
+      color: #666666;
+      height: 60px;
+      overflow: hidden;
+
+      &.align-center {
+        text-align: center;
+      }
+      
+      &.disabled{
+        display: none;
+      }
+
+      .tdlbl {
+        vertical-align: top;
+        color: $brownish-grey;
+      }
+      a.tdlbl{
+        color: $rich-electric-blue;
+      }
+
+    }
+  }
+}
+
+// col widths
+.table-container {
+      
+  .tr {
+    .th {
+      padding: 0 0 0 9px;
+      min-height: 40px;
+    }
+  }
+
+  .table-lt {
+    .th, .td {
+      &:nth-child(1) {
+        flex: 0 94px;
+        min-width: 94px;
+      }
+    }
+  }
+
+  /* table-mid */
+  .table-mid {
+    .tr {
+      .th, .td {
+        flex: 1;
+      }
+    }
+
+    .table-mid-con {
+      min-width: 1360px;
+    }
+  }
+
+  .table-query {
+    .tr {
+      justify-content: space-between;
+
+      .th, .td {
+        &:nth-child(1) {
+          flex: 0 64px;
+        }
+
+        &:nth-child(2) {
+          flex: 0 80px;
+        }
+
+        &:nth-child(3) {
+          flex: 0 100px;
+        }
+
+        &:nth-child(4) {
+          flex: 0 90px;
+        }
+
+        &:nth-child(5) {
+          flex: 0 72px;
+        }
+
+        &:nth-child(6) {
+          flex: 0 86px;
+        }
+
+        &:nth-child(7) {
+          flex: 0 90px;
+        }
+
+        &:nth-child(8) {
+          flex: 0 84px;
+        }
+
+        &:nth-child(9) {
+          flex: 0 80px;
+        }
+
+        &:nth-child(10) {
+          flex: 0 90px;
+        }
+
+        &:nth-child(11) {
+          flex: 0 92px;
+        }
+
+        &:nth-child(12) {
+          flex: 0 80px;
+        }
+
+        &:nth-child(13) {
+          flex: 0 70px;
+        }
+        &:nth-child(14) {
+          flex: 0 80px;
+        }
+        &:nth-child(15) {
+          flex: 0 80px;
+        }
+        &:nth-child(16) {
+          flex: 0 100px;
+        }
+        &:nth-child(17) {
+          flex: 0 100px;
+        }
+
+        &:last-child{
+          padding-right: 10px;
+        }
+      }
+    }
+  }
+}
+
+// pagination-section
+.pagination-section {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 21px;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: left;
+  color: $brownish-grey;
+
+  .seperator {
+    margin: 0 10px;
+    color: $silver;
+  }
+
+  .select-wrap {
+    margin: 0 10px;
+  }
+
+  .col-pagination {
+    display: flex;
+    align-items: center;
+  }
+
+  .per-page {
+    display: flex;
+    align-items: center;
+  }
+
+  .pagination {
+    display: flex;
+    position: relative;
+
+    a {
+      width: 15px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 18px;
+      color: $steel-grey;
+    }
+
+    .active {
+      a {
+        color: $brownish-grey;
+      }
+    }
+
+    li {
+      position: relative;
+
+      &:first-child {
+        margin-right: 6px;
+        a {
+          background: url("../../i/fwd-arrow.svg") 50% 50% no-repeat;
+          background-size: 6px;
+          text-align: left;
+          text-indent: -999px;
+          transform: rotate(180deg);
+              overflow: hidden;
+        }
+      }
+
+      &:last-child {
+        margin-left: 6px;
+        a {
+          background: url("../../i/fwd-arrow.svg") 50% 50% no-repeat;
+          background-size: 6px;
+          text-align: left;
+          text-indent: -999px;
+          overflow: hidden;
+        }
+      }
+      &.disabled{
+        opacity: 0.3;
+      }
+    }
+  }
+
+  select {
+    width: 56px;
+  }
+
+}
+

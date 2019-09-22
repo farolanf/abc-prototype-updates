@@ -1,0 +1,1257 @@
+import React, { Component } from 'react';
+import PT from 'prop-types';
+import { cloneDeep, min, get, map, findIndex, trim, omitBy, toArray, find } from 'lodash';
+import * as moment from 'moment';
+import Pagination from "react-js-pagination";
+import RadioCtrl from '../../components/RadioCtrl';
+import FileDragDrop from '../../components/FileDragDrop';
+import UserSelector from '../../components/UserSelector';
+import * as roles from '../../constants/roleTypes';
+import { DATE_FORMAT, DATETIME_FORMAT } from '../../config';
+import * as statuses from '../../constants/queryStatusTypes';
+import { columns, fields } from '../../constants/queryFields';
+import utils from '../../utils';
+import './QueryTable.scss';
+
+const QueryDetails = ({ query }) => {
+  return (
+    <ul className="more-details">
+      {
+        fields.map(field => (
+          <li key={field.id} className="details-el">
+            <div>{field.label}:</div>
+            {
+              field.type === 'array'
+                ? query[field.id] && query[field.id].map((arrayEl, j) => (<div key={j}><span>{field.id === 'watchers' ? (get(arrayEl, 'firstName', '') + ' ' + get(arrayEl, 'lastName', '')) : arrayEl.name}</span>&nbsp;</div>
+                )) :
+                <div className="details-value">{utils.formatField(query, field)}</div>
+            }
+          </li>
+        ))
+      }
+    </ul>
+  )
+}
+
+// QueryTable component: This component contains query table & it's options
+class QueryTable extends Component {
+  constructor(props) {
+    super(props);
+
+    this.loadData = this.loadData.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
+    this.handlePageSizeChange = this.handlePageSizeChange.bind(this);
+    this.toggleColView = this.toggleColView.bind(this);
+    this.applyColView = this.applyColView.bind(this);
+    this.cancelColView = this.cancelColView.bind(this);
+    this.showQueryDetails = this.showQueryDetails.bind(this);
+    this.toggleQueryInfoView = this.toggleQueryInfoView.bind(this);
+    this.isQuerySelected = this.isQuerySelected.bind(this);
+    this.reassignSDM = this.reassignSDM.bind(this);
+    this.showMore = this.showMore.bind(this);
+    this.expandRow = this.expandRow.bind(this);
+    this.toggleWatcher = this.toggleWatcher.bind(this);
+    this.toggleReassignPopup = this.toggleReassignPopup.bind(this);
+    this.selectSingleQuery = this.selectSingleQuery.bind(this);
+    this.toggleQueryRow = this.toggleQueryRow.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.showModal = this.showModal.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.reassignQueries = this.reassignQueries.bind(this);
+    this.addWatcher = this.addWatcher.bind(this);
+    this.onAttachmentsChange = this.onAttachmentsChange.bind(this);
+    this.closeQueries = this.closeQueries.bind(this);
+    this.rejectQueries = this.rejectQueries.bind(this);
+    this.showRejectReason = this.showRejectReason.bind(this);
+    this.toggleRequestor = this.toggleRequestor.bind(this);
+
+    this.state = {
+      sortOrder: 'desc',
+      sortBy: '',
+      page: 1,
+      perPage: 10,
+      queryRecords: [],
+      columnsFinal: cloneDeep(columns),
+      columnsEdit: cloneDeep(columns),
+      attachments: [],
+      queryExpanded: null,
+      reassignedSdm: null,
+      expandedRecordIds: [],
+      watcherHistory: [],
+      selectedQuery: null,
+      reassignSdmInput: '',
+      commentInput: '',
+      errors: {},
+      rejectReason: 'Incomplete details'
+    }
+  }
+
+  loadData(page) {
+    if (page) {
+      this.setState({ page });
+    }
+    this.props.getQueries({
+      sortBy: utils.querySortMap(this.state.sortBy),
+      sortOrder: this.state.sortOrder,
+      page: page || this.state.page,
+      perPage: this.state.perPage
+    });
+  }
+
+  // showQueryDetails
+  showQueryDetails(item) {
+    this.props.getQuery(item.id);
+    this.setState({
+      selectedQuery: item
+    }, () => {
+      this.showModal('isQueryDetailsModal');
+    });
+  }
+
+  // showMore
+  showMore(e) {
+    e.stopPropagation();
+    const el = e.target;
+    const m = document.querySelectorAll('.more');
+    for (let i = 0; i < m.length; i++) {
+      const nel = m[i];
+      nel.classList.remove('open');
+    }
+    el.classList.add('open');
+
+    const b = document.querySelector('body');
+    b.addEventListener('click', function () {
+      const m = document.querySelectorAll('.more');
+      for (let j = 0; j < m.length; j++) {
+        const nel = m[j];
+        nel.classList.remove('open');
+      }
+    })
+  }
+
+  handlePageChange(pageNumber) {
+    this.setState({ page: pageNumber }, this.loadData);
+  }
+
+  // handles PageSize Change events
+  handlePageSizeChange(event) {
+    this.setState({
+      perPage: event.target.value,
+      page: 1
+    }, this.loadData);
+  }
+
+  // toggleQueryInfoView
+  toggleQueryInfoView() {
+    this.setState({
+      isQueryInfoCollapsed: !this.state.isQueryInfoCollapsed
+    })
+  }
+
+  // function to implement table sorting
+  sortTable(sortBy) {
+    // unsortable columns
+    if (['watchers', 'attachments'].indexOf(sortBy) >= 0) {
+      return;
+    }
+    let sortOrder = 'asc';
+    if (this.state.sortBy === sortBy) {
+      sortOrder = this.state.sortOrder === 'asc' ? 'desc' : 'asc';
+    }
+    this.setState({
+      sortOrder,
+      sortBy
+    }, this.loadData)
+  }
+
+  toggleColView(item) {
+    item.isDisabled = !item.isDisabled;
+    this.setState({
+      columnsEdit: cloneDeep(this.state.columnsEdit)
+    });
+  }
+
+  // applyColView
+  applyColView() {
+    this.setState({
+      columnsFinal: cloneDeep(this.state.columnsEdit)
+    });
+    this.props.closeModal('isManageColModal');
+    // debugger;
+    const enabledList = omitBy(this.state.columnsEdit, (item)=>{return item.isDisabled;});
+    if (toArray(enabledList).length < 11) {
+      document.querySelector('.table-mid').classList.add('alt');
+    } else {
+      document.querySelector('.table-mid').classList.remove('alt');
+    }
+  }
+
+  cancelColView() {
+    this.setState({
+      columnsEdit: cloneDeep(this.state.columnsFinal)
+    });
+    this.props.closeModal('isManageColModal');
+  }
+
+  // selectSingleQuery
+  selectSingleQuery(isChecked, record) {
+    this.props.clearSelectedQueries(() => this.props.selectQuery(isChecked, record));
+  }
+
+  getSelectedQueries(){
+    const {queriesSelected} = this.props;
+    if(queriesSelected && queriesSelected.length){
+      return queriesSelected;
+    }else if(this.state.selectedQuery){
+      return [this.state.selectedQuery];
+    }else{
+      return [];
+    }
+  }
+
+  // respondAction
+  respondAction(record) {
+    this.setState({
+      selectedQuery: record
+    }, ()=>{
+      this.showModal('isRespondModal');
+    });
+  }
+
+  // rejectAction
+  rejectAction(record) {
+    this.setState({
+      selectedQuery: record
+    }, ()=>{
+      this.showModal('isRejectModal');
+    });
+  }
+
+  // reassignAction
+  reassignAction(record) {
+    this.setState({
+      selectedQuery: record
+    }, ()=>{
+      this.showModal('isReassignModal');
+    });
+  }
+
+  // isQuerySelected
+  isQuerySelected(record) {
+    return findIndex(this.props.queriesSelected, ['id', record.id]) >= 0;
+  }
+
+  // reassignSdm
+  reassignSDM(newSdm) {
+    this.setState({
+      reassignedSdm: newSdm
+    })
+  }
+
+  // expandRow
+  expandRow(record) {
+    const qid = record.id;
+    const qIdx = this.state.expandedRecordIds.indexOf(qid);
+    const isExpanded = qIdx > -1;
+    if (isExpanded) {
+      const newERI = cloneDeep(this.state.expandedRecordIds);
+      newERI.splice(qIdx, 1);
+      this.setState({
+        expandedRecordIds: newERI
+      })
+    } else {
+      const expandedRecordIds = this.state.expandedRecordIds;
+      expandedRecordIds.push(qid);
+      this.setState({
+        expandedRecordIds
+      })
+    }
+  }
+
+  // isExpandedRow: toggle the expanded state
+  isExpandedRow(queryId) {
+    return this.state.expandedRecordIds.indexOf(queryId) > -1;
+  }
+
+  // toggleWatcher
+  toggleWatcher(isVisible) {
+    this.setState({
+      isWatcherPopVisible: isVisible
+    });
+  }
+
+  toggleRequestor(isVisible) {
+    this.setState({
+      isRequestorPopVisible: isVisible
+    });
+  }
+
+  // toggleReassignPopup
+  toggleReassignPopup(isVisible) {
+    this.setState({
+      isReassignSDM: isVisible
+    })
+  }
+
+  toggleQueryRow(query) {
+    if (this.state.queryExpanded && this.state.queryExpanded.id === query.id) {
+      this.setState({ queryExpanded: null });
+    } else {
+      this.setState({
+        queryExpanded: query
+      })
+    }
+  }
+
+  isWatched(query) {
+    return map(query.watchers || [], 'id').indexOf(this.props.user.id) >= 0;
+  }
+
+  toggleWatch(query) {
+    const { watchQuery, unwatchQuery } = this.props;
+    if (this.isWatched(query)) {
+      unwatchQuery(query.id);
+    } else {
+      watchQuery(query.id);
+    }
+  }
+
+  isEditable(query) {
+    return query.sdmId === this.props.user.id && (query.status === statuses.NEW || query.status === statuses.OPEN);
+  }
+
+  isAssignable(query) {
+    return query.status === statuses.NEW || query.status === statuses.OPEN;
+  }
+
+  showModal(type) {
+    if (type !== 'isRejectReasonModal') {
+      this.setState({
+        attachments: [],
+        commentInput: ''
+      });
+    }
+    this.props.showModal(type);
+    document.querySelector('body').classList.add('hasmodal');
+
+  }
+
+  closeModal(type) {
+    if (type === 'isReassignModal') {
+      this.setState({
+        reassignedSdm: null,
+        reassignSdmInput: ''
+      });
+    }
+    if(type === 'isRejectModal' || type ===  'isRespondModal'){
+      this.setState({
+        attachments: [],
+        commentInput: ''
+      });
+    }
+    if(type === 'isQueryDetailsModal'){
+      this.setState({
+        isRequestorPopVisible: false,
+        isWatcherPopVisible: false,
+        isReassignSDM: false,
+      });
+    }
+    this.setState({
+      queryExpanded: null,
+      errors: {}
+    });
+    this.props.closeModal(type);
+    document.querySelector('body').classList.remove('hasmodal');
+
+  }
+
+  handleChange(key, value) {
+    this.setState({
+      [key]: value
+    });
+    if (key === 'commentInput' && value) {
+      this.setState({
+        errors: {
+          ...this.state.errors,
+          commentInput: false
+        }
+      })
+    }
+    if (key === 'reassignSdmInput') {
+      this.props.loadUsers(value, [roles.DELIVERY_USER]);
+    }
+  }
+
+  reassignQueries(queryIds, userId) {
+    this.props.reassignQueries(queryIds, userId).then(resp => {
+      if (resp.ok) {
+        this.props.clearSelectedQueries();
+        this.loadData();
+        this.toggleReassignPopup(false);
+        if (this.props.modal.isReassignModal) {
+          this.closeModal('isReassignModal');
+        }
+      }
+    })
+  }
+
+  addWatcher(query, user) {
+    this.props.updateWatchers(query.id, map(query.watchers, 'id').concat([user.id])).then(resp => {
+      if (resp.ok) {
+        this.toggleWatcher(false);
+      }
+    })
+  }
+
+  changeRequestor(query, user) {
+    this.props.changeRequestor(query.id, user.id).then(resp => {
+      if (resp.ok) {
+        this.toggleRequestor(false);
+        this.closeModal('isQueryDetailsModal');
+        this.loadData();
+      }
+    })
+  }
+
+  onAttachmentsChange(attachments) {
+    this.setState({ attachments });
+  }
+
+  closeQueries(queries) {
+    const { commentInput, attachments } = this.state;
+    const { createComment } = this.props;
+    if (trim(commentInput)) {
+      createComment({
+        text: commentInput,
+        files: attachments,
+        status: statuses.CLOSED,
+        queryIds: map(queries, 'id')
+      }).then(resp => {
+        if (resp.ok) {
+          this.props.clearSelectedQueries();
+          this.closeModal();
+        }
+      });
+    } else {
+      this.setState({
+        errors: {
+          commentInput: true
+        }
+      })
+    }
+  }
+
+  rejectQueries(queries) {
+    const { commentInput, attachments, rejectReason } = this.state;
+    const { createComment } = this.props;
+    if (trim(commentInput)) {
+      createComment({
+        text: commentInput,
+        files: attachments,
+        status: statuses.REJECTED,
+        rejectReason,
+        queryIds: map(queries, 'id')
+      }).then(resp => {
+        if (resp.ok) {
+          this.props.clearSelectedQueries();
+          this.closeModal();
+        }
+      });
+    } else {
+      this.setState({
+        errors: {
+          commentInput: true
+        }
+      })
+    }
+  }
+
+  showRejectReason() {
+    if (trim(this.state.commentInput)) {
+      this.closeModal();
+      this.showModal('isRejectReasonModal')
+    } else {
+      this.setState({
+        errors: {
+          commentInput: true
+        }
+      });
+    }
+  }
+
+  isDetailsItemDisable(id){
+    return get(find(this.state.columnsFinal, ['id', id]), 'isDisabled', false);
+  }
+
+  render() {
+    const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment } = this.props;
+    const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
+      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason } = this.state;
+    const startIndex = (dataset.page - 1) * dataset.perPage + 1;
+    const endIndex = min([dataset.page * dataset.perPage, dataset.total]);
+
+    return (
+      <div className={`table-section ${className}`}>
+        <div className="table-container">
+          <div className="table table-lt">
+            <div className="thead">
+              <div className="tr">
+                {
+                  columnsFinal.map((item, i) => {
+                    return !item.isDetails && i === 0 && (
+                      <div key={i} className={"th align-center query-col " + (item.isDisabled ? 'disabled' : '')}>
+                        <span className={"thlbl " + sortOrder + ' ' + (sortBy === item.id ? ' sortable' : ' ')} onClick={() => this.sortTable(item.id)}>{item.label}</span>
+                      </div>
+                    )
+                  })
+                }
+              </div>
+            </div>
+            <div className="tbody">
+              {
+                dataset.results.map((record, i) => (
+                  <div key={i} className={"tr val-status " + record.status + " " + (this.isExpandedRow(record.id) ? 'expanded' : '')}>
+                    {
+                      columnsFinal.map((item, j) => {
+                        return !item.isDetails && j === 0 && (
+                          <div key={j} className={"td query-col " + (item.isDisabled ? 'disabled' : '')}>
+                            <div className={"query-val " + (this.isEditable(record) ? 'selectable' : '')}>
+                              <RadioCtrl params={{ label: "", isChecked: this.isQuerySelected(record) }} onChange={(isChecked) => selectQuery(isChecked, record)} />
+                              <span className="tdlbl"><a onClick={() => this.showQueryDetails(record)}>{record.id}</a>
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+          {/* table-lt */}
+
+          <div className="table table-query table-mid">
+            <div className="table-mid-con">
+              <div className="thead">
+                <div className="tr">
+                  {
+                    columnsFinal.map((item, i) => {
+                      return !item.isDetails && i > 0 && (
+                        <div key={i} className={"th " + (item.isDisabled ? 'disabled' : '')}>
+                          <span className={"thlbl " + this.state.sortOrder + ' ' + (this.state.sortBy === item.id ? ' sortable' : ' ')} onClick={() => this.sortTable(item.id)}>{item.label}</span>
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              </div>
+              <div className="tbody">
+                {
+                  dataset.results.map((record, i) => (
+                    <div key={i} className={"tr expandable " + record.status + " " + (this.isExpandedRow(record.id) ? 'expanded' : '')}>
+                      <div className="norm tr-inner">
+                        {
+                          columnsFinal.map((item, i) => {
+                            return !item.isDetails && i > 0 && (
+                              <div key={i} className={"td " + (item.isDisabled ? 'disabled' : '')}>
+                                {
+                                  item.type === 'array' && record[item.id] && record[item.id].map((arrayEl, j) => {
+                                    return j === 0 && <span key={j}>
+                                      <a>{item.id === 'watchers' ? (get(arrayEl, 'firstName', '') + ' ' + get(arrayEl, 'lastName', '')) : arrayEl.name} {record[item.id].length > 1 ? `& ${record[item.id].length - 1} more` : ''} </a>&nbsp;
+                                      </span>
+                                  })
+                                }
+                                {
+                                  item.type === 'date' && record[item.id] && <span>{moment(record[item.id]).format(DATE_FORMAT)}</span>
+                                }
+                                {
+                                  item.type === 'datetime' && record[item.id] && <span>{moment(record[item.id]).format(DATETIME_FORMAT)}</span>
+                                }
+                                {
+                                  !item.type && item.format === 'link' && <a>{record[item.id]}</a>
+                                }
+                                {
+                                  !item.type && !item.format && <span>{record[item.id]}</span>
+                                }
+                              </div>
+                            )
+                          })
+
+                        }
+                      </div>
+                      <div className="on-expand tr-inner">
+                        <div className="tr-inner-details">
+                          <div className={"group " + (this.isDetailsItemDisable('billingIndex') ? 'disable' : '')}>
+                            <h4>Billing Index</h4>
+                            <div className="val">{record.billingIndex}</div>
+                          </div>
+
+                          <div className={"group " + (this.isDetailsItemDisable('billingStartDate') ? 'disable' : '')}>
+                            <h4>Billing Start Date</h4>
+                            <div className="val">{record.billingStartDate ? moment(record.billingStartDate).format(DATE_FORMAT) : 'N/A'}</div>
+                          </div>
+
+                          <div className={"group " + (this.isDetailsItemDisable('billingEndDate') ? 'disable' : '')}>
+                            <h4>Billing End Date</h4>
+                            <div className="val">{record.billingEndDate ? moment(record.billingEndDate).format(DATE_FORMAT) : 'N/A'}</div>
+                          </div>
+
+                          <div className={"group " + (this.isDetailsItemDisable('valueToBeBilled') ? 'disable' : '')}>
+                            <h4>Value to be billed</h4>
+                            <div className="val">{record.valueToBeBilled}</div>
+                          </div>
+
+                          <div className={"group " + (this.isDetailsItemDisable('currencyName') ? 'disable' : '')}>
+                            <h4>Currency</h4>
+                            <div className="val">{record.currencyName}</div>
+                          </div>
+
+                          <div className={"group " + (this.isDetailsItemDisable('closedDate') ? 'disable' : '')}>
+                            <h4>Date & Time Closed</h4>
+                            <div className="val">{record.closedDate ? moment(record.closedDate).format(DATETIME_FORMAT) : 'N/A'}</div>
+                          </div>
+
+                          <div className="group comment-group">
+                            <h4>SDM Comments</h4>
+                            <div className="val">{record.sdmComments.map(c => c.text).join('\n')}</div>
+                          </div>
+
+                          {
+                            record.status === statuses.REJECTED &&
+                            <div className="group comment-group">
+                              <h4>Reject Reason</h4>
+                              <div className="val">{record.sdmComments.map(c => c.rejectReason).join('\n')}</div>
+                            </div>
+                          }
+
+                          <div className="group">
+                            <h4>Attachments</h4>
+                            <div className="val">{
+                              record.attachments && record.attachments.map((attachment, idx) => {
+                                return (
+                                  <div key={idx} className="attachments">
+                                    <div className={"file " + attachment.format}><a>{attachment.name}</a></div>
+                                  </div>
+                                )
+                              })
+                            }</div>
+                          </div>
+
+                          <div className="group">
+                            <h4>Rework Reason</h4>
+                            <div className="val">{record.reworkReason}</div>
+                          </div>
+
+                          <div className="group">
+                            <h4>Requestor</h4>
+                            <div className="val"><a>{record.requestorName}</a></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+          {/* /.table-mid */}
+
+          <div className="table table-rt">
+            <div className="thead">
+              <div className="tr">
+                <div className="th">
+                  <span className="thlbl static">Actions</span>
+                </div>
+              </div>
+            </div>
+            <div className="tbody">
+              {
+                dataset.results.map((record, i) => (
+                  <div key={record.id} className={"tr " + record.status + " " + (this.isExpandedRow(record.id) ? 'expanded' : '')}>
+                    <div className="td align-center action-col">
+                      <div className={`more ${this.isAssignable(record) ? '' : 'invisiable'}`} onClick={(e) => { this.showMore(e) }}>
+                        <ul className="popup-more-actions">
+                          {this.isEditable(record) && user.role === roles.DELIVERY_USER && <li className="res" onClick={() => this.respondAction(record)}>Respond</li>}
+                          {this.isEditable(record) && user.role === roles.DELIVERY_USER && <li className="rej" onClick={() => this.rejectAction(record)}>Reject</li>}
+                          {this.isAssignable(record) && <li className="rea" onClick={() => this.reassignAction(record)}>Re-assign</li>}
+                          {user.role !== roles.MANAGEMENT_USER && <li className="a2w" onClick={() => this.toggleWatch(record)}>{this.isWatched(record) ? 'Unwatch' : 'Add to Watch List'}</li>}
+                        </ul>
+                      </div>
+                      <a className="toogle-expand" onClick={() => this.expandRow(record)}> </a>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+          {/* table-rt */}
+        </div>
+
+        {/* pagination */}
+        <div className="pagination-section">
+          <div className="col-pagination">
+            <span className="txt">Showing {Math.min(startIndex, dataset.total)}-{endIndex} of {dataset.total}</span>
+            <span className="seperator">|</span>
+            <div className="per-page"> <span className="lbl">View</span>
+              <div className="select-wrap">
+                <select className="select-ctrl" value={perPage} onChange={this.handlePageSizeChange}>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="30">30</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+              <span className="lbl">Per Page</span>
+            </div>
+          </div>
+          <div className="col-pagination">
+            <Pagination
+              hideFirstLastPages
+              activePage={page}
+              itemsCountPerPage={perPage}
+              totalItemsCount={dataset.total}
+              pageRangeDisplayed={5}
+              onChange={this.handlePageChange}
+            />
+          </div>
+        </div>
+
+        {
+          modal && modal.isManageColModal && <div className="modal-wrap">
+            <div className="modal modal-cols">
+              <header>
+                <h2 className="modal-title">Manage Columns</h2>
+                <a className="close-modal" onClick={this.cancelColView}> </a>
+              </header>
+              <div className="modal-body layout-centered">
+                <ul className="col-view manage-col-view">
+                  {
+                    columnsEdit.map((item, i) => {
+                      return i > 0 && i < columnsEdit.length / 2 + 1 && (
+                        <li key={i} onClick={() => this.toggleColView(item)}>
+                          <span className="col">{item.label}</span>
+                          <span className={"toggle-button " + (item.isDisabled ? 'off' : 'on')}> </span>
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+                <ul className="col-view manage-col-view">
+                  {
+                    columnsEdit.map((item, i) => {
+                      return i >= columnsEdit.length / 2 + 1 && (
+                        <li key={i} onClick={() => this.toggleColView(item)}>
+                          <span className="col">{item.label}</span>
+                          <span className={"toggle-button " + (item.isDisabled ? 'off' : 'on')}> </span>
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+              </div>
+              <footer className="modal-footer modal-actions">
+                <a className="btn" onClick={this.applyColView}>Apply</a>
+                <a className="btn btn-clear" onClick={this.cancelColView}>Cancel</a>
+              </footer>
+            </div>
+          </div>
+        }
+
+        {
+          modal && modal.isQueryDetailsModal && selectedQuery && <div className="modal-wrap">
+            <div className="modal modal-cols">
+              <header>
+                <h2 className="modal-title">Query Details</h2>
+                <a className="close-modal" onClick={() => this.closeModal('isQueryDetailsModal')}> </a>
+              </header>
+              <div className="modal-content">
+                <div className="query-info">
+                  <header className="query-header">
+                    <h3 className={"query-info-h " + (this.state.isQueryInfoCollapsed ? 'alt' : '')}
+                      onClick={this.toggleQueryInfoView}
+                    >Query Info <i></i></h3>
+                    {
+                      this.isAssignable(selectedQuery) &&
+                      <div className="opts">
+                        <a className="btn btn-clear">
+                          <span className="btn-lbl ico-re-assign" onClick={() => this.toggleReassignPopup(true)}>Re-assign</span>
+                        </a>
+                        {user.role !== roles.MANAGEMENT_USER && <a className="btn btn-clear">
+                          <span className="btn-lbl ico-watchlist" onClick={() => this.toggleWatch(selectedQuery)}>{this.isWatched(selectedQuery) ? 'Unwatch' : 'Add to Watch List'}</span>
+                        </a>
+                        }
+                        {
+                          this.state.isReassignSDM &&
+                          <UserSelector
+                            className={(this.state.isReassignSDM ? ' open ' : ' ') + (user.role === roles.MANAGEMENT_USER ? ' alt ' : '')}
+                            title="Re-assign SDM"
+                            toggle={this.toggleReassignPopup}
+                            users={users}
+                            loadUsers={loadUsers}
+                            roles={[roles.DELIVERY_USER]}
+                            onChange={user => this.reassignQueries([selectedQuery.id], user.id)}
+                          />
+                        }
+                      </div>
+                    }
+                  </header>
+                  <div className={"modal-body query-info-body " + (this.state.isQueryInfoCollapsed ? 'collapse' : '')}>
+                    <ul className="col-view">
+                      {
+                        fields.map((item, i) => {
+                          return i < fields.length / 2 && (
+                            <li key={i}>
+                              <span className="col">{item.label}</span>
+                              <span className={"val-" + item.id + " " + selectedQuery[item.id]}>{utils.formatField(selectedQuery, item)}</span>
+                            </li>
+                          )
+                        })
+                      }
+                    </ul>
+                    <ul className="col-view">
+                      {
+                        fields.map((item, i) => {
+                          return i >= fields.length / 2 && (
+                            <li key={i}>
+                              <span className="col">{item.label}</span>
+                              <div className={(item.id === 'watchers' || item.id === 'requestorName') ? 'watchers-wrap':''}>
+                                {
+                                  item.type === 'array'
+                                    ? selectedQuery[item.id] && selectedQuery[item.id].map((arrayEl, j) => {
+                                      return <div key={j}><a>{item.id === 'watchers' ? (get(arrayEl, 'firstName', '') + ' ' + get(arrayEl, 'lastName', '')) : arrayEl.name}</a>&nbsp;</div>
+                                    })
+
+                                    : item.format === 'link'
+                                      ? <a>{selectedQuery[item.id]}</a>
+                                      : <span>{utils.formatField(selectedQuery, item)} </span>
+                                }
+                                {
+                                  item.id === 'sdmName' && get(selectedQuery, 'sdm.id', 0) === user.id &&
+                                  <span>&nbsp;(ME)</span>
+                                }
+                                {
+                                  item.id === 'watchers'
+                                  && <div className="add-watchers">
+                                    {user.role === roles.DELIVERY_USER && this.isEditable(selectedQuery) && <a onClick={() => this.toggleWatcher(true)}>+Add Watcher</a>}
+                                    {
+                                      this.state.isWatcherPopVisible &&
+                                      <UserSelector
+                                        className={this.state.isWatcherPopVisible ? 'open' : ''}
+                                        title="Add Watcher"
+                                        toggle={this.toggleWatcher}
+                                        users={users}
+                                        loadUsers={loadUsers}
+                                        roles="all"
+                                        buttonTitle="Add"
+                                        excludes={selectedQuery.watchers}
+                                        onChange={user => this.addWatcher(selectedQuery, user)}
+                                      />
+                                    }
+                                  </div>
+                                }
+                                {
+                                  item.id === 'requestorName'
+                                  && <span className="add-watchers inline">
+                                    {user.role === roles.CONTRACT_ADMIN_USER && <a onClick={() => this.toggleRequestor(true)}>Change</a>}
+                                    {
+                                      this.state.isRequestorPopVisible &&
+                                      <UserSelector
+                                        className={'change-requestor ' + (this.state.isRequestorPopVisible ? 'open' : '')}
+                                        title="Change Requestor"
+                                        toggle={this.toggleRequestor}
+                                        users={users}
+                                        loadUsers={loadUsers}
+                                        roles={[roles.CONTRACT_ADMIN_USER]}
+                                        onChange={user => this.changeRequestor(selectedQuery, user)}
+                                      />
+                                    }
+                                  </span>
+                                }
+                              </div>
+                            </li>
+                          )
+                        })
+                      }
+                    </ul>
+                  </div>
+                </div>
+                {/* /.query-info */}
+
+                <div className="section-header">
+                  <h3>Workflow Message</h3>
+                </div>
+                <div className="workflow-msgs">
+                  <div className="col-msg">
+                    <div className="inner">
+                      <h4>{get(selectedQuery, 'requestor.firstName', '') + ' ' + get(selectedQuery, 'requestor.lastName', '')}</h4>
+                      <div className="info">"{selectedQuery.comment}"</div>
+                      <div className="posted-date">{selectedQuery.openedDate ? moment(selectedQuery.openedDate).format(DATETIME_FORMAT) : ''}</div>
+                      <ul className="file-list">
+                        {
+                          selectedQuery.attachments.map(attach => (
+                            <li key={attach.id}><a className="pdf" onClick={() => downloadAttachment(attach)}>{attach.name}</a></li>
+                          ))
+                        }
+                      </ul>
+                    </div>
+                  </div>
+                  {
+                    user.role === roles.DELIVERY_USER && this.isEditable(selectedQuery) &&
+                    <div className="col-msg">
+                      <h4>SDM</h4>
+
+                      <div className="fieldset">
+                        <label>Comment</label>
+                        <div className="val">
+                          <textarea className={`input-ctrl ${errors.commentInput ? 'error' : ''}`} value={commentInput} onChange={e => this.handleChange('commentInput', e.target.value)}></textarea>
+                        </div>
+                      </div>
+
+                      <div className="fieldset">
+                        <label>Attachments</label>
+                        <div className="val">
+                          <FileDragDrop onChange={this.onAttachmentsChange} />
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  {
+                    (selectedQuery.status === statuses.CLOSED || selectedQuery.status === statuses.REJECTED) &&
+                    <div className="col-msg">
+                      <div className="inner">
+                        {
+                          selectedQuery.sdmComments.map(comment => (
+                            <div key={comment.id}>
+                              <h4>{get(comment, 'sdm.firstName', '') + ' ' + get(comment, 'sdm.lastName', '')}</h4>
+                              <div className="info">Comment: <br/>"{comment.text}"</div>
+                              {selectedQuery.status === statuses.REJECTED && <div className="info"><br/><br/>Reject Reason: <br/>"{comment.rejectReason}"</div>}
+                              <div className="posted-date">{comment.createdOn ? moment(comment.createdOn).format(DATETIME_FORMAT) : ''}</div>
+                              <ul className="file-list">
+                                {
+                                  comment.attachments.map(attach => (
+                                    <li key={attach.id}><a className="pdf" onClick={() => downloadAttachment(attach)}>{attach.name}</a></li>
+                                  ))
+                                }
+                              </ul>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  {
+                    this.isEditable(selectedQuery) &&
+                      user.role === roles.DELIVERY_USER
+                      ? (<div>
+                        <a className="btn" onClick={() => this.closeQueries([selectedQuery])}>Submit</a>
+                        <a className="btn btn-primary" onClick={this.showRejectReason}>Reject</a>
+                      </div>) :
+                      (<div>
+                        <a className="btn" onClick={this.closeModal}>Close</a>
+                      </div>)
+                  }
+                </div>
+                {
+                  this.isEditable(selectedQuery) &&
+                  user.role === roles.DELIVERY_USER &&
+                  <div className="rt">
+                    <a className="btn btn-clear" onClick={() => this.closeModal('isQueryDetailsModal')}>Cancel</a>
+                  </div>
+                }
+              </footer>
+            </div>
+          </div>
+        }
+        {
+          modal && modal.isRespondModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-bulk-process">
+              <header>
+                <h2 className="modal-title">
+                  {this.getSelectedQueries().length > 1
+                    ? <span>Respond to Multiple Queries</span>
+                    : <span>Respond to Query</span>
+                  }
+                </h2>
+                <a className="close-modal" onClick={() => this.closeModal('isRespondModal')}> </a>
+              </header>
+              <div className="modal-content">
+                <ul className="multiple-query-list">
+                  {
+                    this.getSelectedQueries().map((query, i) => {
+                      return (
+                        <li key={i} className={queryExpanded && queryExpanded.id === query.id ? 'open' : ''}>
+                          <div className="li-con">
+                            <span className="qid">Query Id {query.id}</span>
+                            <div className="qopts">
+                              {
+                                this.getSelectedQueries().length > 1
+                                && <a className="del" onClick={() => selectQuery(false, query)} > </a>
+                              }
+                              <a className="toggle-handle" onClick={() => this.toggleQueryRow(query)}> </a>
+                            </div>
+                          </div>
+                          {queryExpanded && <QueryDetails query={queryExpanded}></QueryDetails>}
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+
+                <div className="sdm-con">
+                  <div className="col-msg alt">
+                    <h4>SDM</h4>
+
+                    <div className="fieldset-group">
+                      <div className="fieldset">
+                        <label>Comment</label>
+                        <div className="val">
+                          <textarea className={`input-ctrl ${errors.commentInput ? 'error' : ''}`} value={commentInput} onChange={e => this.handleChange('commentInput', e.target.value)}></textarea>
+                        </div>
+                      </div>
+
+                      <div className="fieldset">
+                        <label>Attachments</label>
+                        <div className="val">
+                          <FileDragDrop onChange={this.onAttachmentsChange} />
+                        </div>
+                      </div>
+                    </div>
+                    {/* /.fieldset-group */}
+                  </div>
+                </div>
+                {/* /.sdm-con */}
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn" onClick={() => this.closeQueries(this.getSelectedQueries())}>Submit</a>
+                  <a className="btn btn-clear" onClick={() => this.closeModal('isRespondModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-bulk-process */}
+          </div>
+        }
+
+        {
+          modal && modal.isRejectModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-bulk-process">
+              <header>
+                <h2 className="modal-title">
+                  {
+                    this.getSelectedQueries().length > 1
+                      ? <span>Reject Multiple Queries</span>
+                      : <span>Reject Query</span>
+                  }
+                </h2>
+                <a className="close-modal" onClick={() => this.closeModal('isRejectModal')}> </a>
+              </header>
+              <div className="modal-content">
+                <ul className="multiple-query-list">
+                  {
+                    this.getSelectedQueries().map((query, i) => {
+                      return (
+                        <li key={i} className={queryExpanded && queryExpanded.id === query.id ? 'open' : ''}>
+                          <div className="li-con">
+                            <span className="qid">Query Id {query.id}</span>
+                            <div className="qopts">
+                              {
+                                this.getSelectedQueries().length > 1
+                                && <a className="del" onClick={() => selectQuery(false, query)} > </a>
+                              }
+                              <a className="toggle-handle" onClick={() => this.toggleQueryRow(query)}> </a>
+                            </div>
+                          </div>
+                          {queryExpanded && <QueryDetails query={queryExpanded}></QueryDetails>}
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+
+                <div className="sdm-con">
+                  <div className="col-msg alt">
+                    <h4>SDM</h4>
+                    <div className="fieldset-group">
+                      <div className="fieldset">
+                        <label>Comment</label>
+                        <div className="val">
+                          <textarea className={`input-ctrl ${errors.commentInput ? 'error' : ''}`} value={commentInput} onChange={e => this.handleChange('commentInput', e.target.value)}></textarea>
+                        </div>
+                      </div>
+
+                      <div className="fieldset">
+                        <label>Attachments</label>
+                        <div className="val">
+                          <FileDragDrop onChange={this.onAttachmentsChange} />
+                        </div>
+                      </div>
+                    </div>
+                    {/* /.fieldset-group */}
+                  </div>
+                </div>
+                {/* /.sdm-con */}
+
+                <div className="reject-reason">
+                  <label>Reject Reason</label>
+                  <div className="select-ctrl-wrap">
+                    <select className="select-ctrl" value={rejectReason} onChange={e => this.handleChange('rejectReason', e.target.value)}>
+                      {
+                        lookup.rejectReason.map((item, i) => {
+                          return <option key={i} value={item.value}>{item.value}</option>
+                        })
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn btn-primary" onClick={() => this.rejectQueries(this.getSelectedQueries())}>Reject</a>
+                  <a className="btn btn-clear" onClick={() => this.closeModal('isRejectModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-bulk-process */}
+          </div>
+        }
+
+        {
+          modal && modal.isRejectReasonModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-reject-reason">
+              <header>
+                <h2 className="modal-title">
+                  <span>Reject Query</span>
+                </h2>
+                <a className="close-modal" onClick={() => this.closeModal('isRejectReasonModal')}> </a>
+              </header>
+              <div className="modal-content">
+
+                <div className="reject-reason fluid-h">
+                  <label>Reject Reason</label>
+                  <div className="select-ctrl-wrap">
+                    <select className="select-ctrl" value={rejectReason} onChange={e => this.handleChange('rejectReason', e.target.value)}>
+                      {
+                        lookup.rejectReason.map((item, i) => {
+                          return <option key={i} value={item.value}>{item.value}</option>
+                        })
+                      }
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn btn-primary" onClick={() => this.rejectQueries([selectedQuery])}>Reject</a>
+                  <a className="btn btn-clear" onClick={() => this.closeModal('isRejectModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-bulk-process */}
+          </div>
+        }
+
+        {
+          modal && modal.isReassignModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-bulk-process">
+              <header>
+                <h2 className="modal-title">
+                  {
+                    this.getSelectedQueries().length > 1
+                      ? <span>Re-assign Multiple Queries</span>
+                      : <span>Re-assign Query</span>
+                  }
+                </h2>
+                <a className="close-modal" onClick={() => this.closeModal('isReassignModal')}> </a>
+              </header>
+              <div className="modal-content">
+                <ul className="multiple-query-list">
+                  {
+                    this.getSelectedQueries().map((query, i) => {
+                      return (
+                        <li key={i} className={this.state.queryExpanded && this.state.queryExpanded.id === query.id ? 'open' : ''}>
+                          <div className="li-con">
+                            <span className="qid">Query Id {query.id}</span>
+                            <div className="qopts">
+                              {
+                                this.getSelectedQueries().length > 1
+                                && <a className="del" onClick={() => selectQuery(false, query)} > </a>
+                              }
+                              <a className="toggle-handle" onClick={() => this.toggleQueryRow(query)}> </a>
+                            </div>
+                          </div>
+                          {queryExpanded && <QueryDetails query={queryExpanded}></QueryDetails>}
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+
+                <div className="reject-reason">
+                  <label>Re-assign SDM</label>
+                  {
+                    reassignedSdm
+                      ? <div className="reassigned-sdm">
+                        <div><a>{get(reassignedSdm, 'firstName', '') + ' ' + get(reassignedSdm, 'lastName')}</a></div>
+                        <div><span>{reassignedSdm.email}</span></div>
+                        <a className="del-sdm" onClick={() => this.setState({ reassignedSdm: null })}> </a>
+                      </div>
+                      :
+                      <div>
+                        <div className="select-ctrl-wrap">
+                          <input type="search" className="input-ctrl search-input" placeholder="Enter username or email" value={reassignSdmInput}
+                            onChange={e => this.handleChange('reassignSdmInput', e.target.value)}
+                          />
+                        </div>
+                        <ul className="sdmopts-list">
+                          {
+                            users.map((user, i) => {
+                              return (
+                                <li key={i}> <a className="name-link">{get(user, 'firstName', '') + ' ' + get(user, 'lastName')}</a>
+                                  <span className="email-col">{user.email}</span>
+                                  <span className="select-col"> <a className="btn btn-clear" onClick={() => this.reassignSDM(user)}>Select</a> </span>
+                                </li>
+                              )
+                            })
+                          }
+                        </ul>
+                      </div>
+                  }
+                </div>
+
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn" onClick={() => { reassignedSdm && this.reassignQueries(map(this.getSelectedQueries(), 'id'), reassignedSdm.id) }}>Submit</a>
+                  <a className="btn btn-clear" onClick={() => this.closeModal('isReassignModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-bulk-process */}
+          </div>
+        }
+      </div>
+    );
+  }
+}
+
+QueryTable.propType = {
+  params: PT.object,
+  closeModal: PT.func,
+  showModal: PT.func
+}
+
+export default QueryTable;

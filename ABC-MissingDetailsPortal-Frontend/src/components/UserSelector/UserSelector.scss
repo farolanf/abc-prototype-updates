@@ -1,0 +1,108 @@
+@import '../../styles/_mixins.scss';
+
+.popup-window {
+  position: absolute;
+  z-index: 10;
+  top: 26px;
+  left: -100px;
+  width: 280px;
+  padding: 16px;
+  min-height: 200px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
+  background-color: $white;
+  border: solid 1px $steel-grey;
+  display: none;
+
+  &.open{
+    display: block;
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    background: #fff;
+    width: 10px;
+    height: 10px;
+    left: calc(50% - 5px);
+    top: -6px;
+    border: solid 1px #87898b;
+    border-width: 1px 0 0 1px;
+    transform: rotate(45deg);
+  }
+
+  .close-popup {
+    position: absolute;
+    right: 18px;
+    top: 10px;
+    width: 16px;
+    height: 16px;
+    background: url("../../i/multiply.svg") 0 0 no-repeat;
+    background-size: 16px;
+  }
+
+  h6 {
+    font-size: 14px;
+    line-height: 18px;
+    text-align: left;
+    color: $black;
+  }
+
+  .search-bar {
+    margin-top: 10px;
+    margin-bottom: 17px;
+    position: relative;
+
+    .input-ctrl {
+      height: 30px;
+      line-height: 30px;
+      padding-left: 32px;
+      background: url("../../i/search.svg") 7px 5px no-repeat;
+      background-size: 16px;
+      font-size: 14px;
+    }
+    .clear-search{
+      position: absolute;
+      right: 7px;
+      top: 7px;
+      width: 16px;
+      height: 16px;
+      background: url('../../i/clear-textbox.svg') 0 0 no-repeat;
+      background-size: 16px;
+    }
+  }
+
+
+  // watcher-history
+  .watcher-history {
+    border-top: 1px solid $silver;
+    margin-top: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+
+    li {
+      display: block;
+      cursor: default;
+      height: 58px;
+      position: relative;
+      padding: 10px 0;
+      border-bottom: 1px solid $silver;
+
+      .u-mail{
+        max-width: 170px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      &.disabled{
+        display: none;
+      }
+
+      .btn, label{
+        position: absolute;
+        right: 0;
+        top: 13px;
+      }
+    }
+  }
+}

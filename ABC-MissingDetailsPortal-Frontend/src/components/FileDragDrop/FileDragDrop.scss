@@ -1,0 +1,77 @@
+@import "../../styles/imports";
+
+.file-drag-drop {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height : 100%;
+
+  // files-dropped
+  .files-dropped {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    overflow: auto;
+    min-height: 35px;
+
+    .file-el {
+      min-width: 100px;
+      height: 30px;
+      line-height: 30px;
+      border-radius: 3px;
+      background-color: $white-two;
+      padding: 0 28px 0 12px;
+      position: relative;
+      margin-bottom: 10px;
+      flex: 0 48%;
+      font-size: 12px;
+      text-align: left;
+      color: $rich-electric-blue;
+      max-width: 48%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      .remove {
+        width: 14px;
+        height: 16px;
+        background: url("../../i/trash.svg") 0 0 no-repeat;
+        background-size: 13px;
+        position: absolute;
+        right: 10px;
+        top: 5px;
+      }
+    }
+  }
+
+  // drop-zone
+  .drop-zone {
+    flex: 1;
+    padding: 10px 0;
+    display: block;
+    background-color: $ice-blue;
+    height: auto;
+    border: 1px solid $rich-electric-blue;
+    border-radius: 3px;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    min-height: 109px;
+
+    .drag-drop-msg {
+      font-size: 14px;
+      line-height: 18px;
+      text-align: center;
+      color: $brownish-grey;
+      background: url("../../i/documents.svg") 50% 0 no-repeat;
+      background-size: 36px;
+
+      a {
+        color: $rich-electric-blue;
+      }
+    }
+  }
+}
+.modal-bulk-process .file-drag-drop .drop-zone{
+  min-height: 109px;
+}

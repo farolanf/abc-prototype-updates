@@ -1,0 +1,131 @@
+@import "../../styles/imports";
+
+// sidebar
+.sidebar {
+  padding-bottom: 20px;
+  position: relative;
+  width: 150px;
+  background-color: $peacock-blue;
+
+  .logo {
+    height: 60px;
+    background-color: $rich-electric-blue;
+    padding: 12px 0 12px 33px;
+
+    .logo-link {
+      display: inline-block;
+      font-family: 'HPSimplifiedLight', arial, sans-serif;
+      width: 54px;
+      height: 35px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: lighter;
+      overflow: hidden;
+      background: url("../../i/hp-blue-logo.gif") 0 0 no-repeat;
+      background-size: 35px 35px;
+      padding: 7px 45px 7px 50px;;
+    }
+  }
+
+  // logger-info
+  .logger-info {
+    border-bottom: solid 1px rgba($white, 0.2);
+    margin: 0 10px;
+    padding-bottom: 16px;
+
+    .logger-thumb {
+      text-align: center;
+      padding-top: 20px;
+
+      img {
+        display: inline-block;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+      }
+    }
+
+    .meta {
+      font-size: 12px;
+      line-height: 1.33;
+      text-align: center;
+      color: $white;
+
+      &.alt {
+        font-size: 14px;
+        margin-top: 10px;
+      }
+    }
+  }
+
+  // nav link list
+  .list {
+    margin-top: 18px;
+    li {
+      position: relative;
+      a {
+        padding-left: 38px;
+        border-left: 4px solid transparent;
+        font-size: 14px;
+        text-align: left;
+        color: $white;
+        opacity: 0.5;;
+        line-height: 24px;
+        display: block;
+      }
+
+      &.multiline{
+        margin-bottom: 20px;
+
+        a{
+        line-height: 17px;
+          &.users{
+            background: url('../../i/users.svg') 11px 4px no-repeat;
+            background-size: 17px 17px;
+          }
+          &.email{
+            background: url('../../i/email.svg') 11px 4px no-repeat;
+            background-size: 17px 17px;
+          }
+          &.sla{
+            background: url('../../i/sla.svg') 11px 0 no-repeat;
+            background-size: 17px 17px;
+          }
+        }
+      }
+
+      &.on{
+        a{
+          opacity: 1;
+        }
+      }
+
+      &.nav-dashboard{
+        a{
+          &:before{
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 2px;
+            width: 17px;
+            height: 17px;
+            background: url('../../i/dash.svg') 0 0 no-repeat;
+            background-size: 17px;
+            opacity: 0.5;
+          }
+        }
+      }
+
+
+      &.on{
+        a{
+          border-left: 4px solid $rich-electric-blue;
+          color: $white;
+          &:before{
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+}

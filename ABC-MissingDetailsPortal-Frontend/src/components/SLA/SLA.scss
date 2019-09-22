@@ -1,0 +1,328 @@
+@import "../../styles/imports";
+
+// single-query-form
+.single-query-form {
+  .page-header {
+    display: flex;
+    padding-top: 23px;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $silver;
+
+    .page-title {
+      padding-bottom: 0;
+    }
+  }
+
+  .title-subpage {
+    margin-top: 24px;
+    font-size: 20px;
+    line-height: 26px;
+    text-align: left;
+    color: $black;
+    margin-bottom: 14px;
+  }
+
+  // query-form
+  .query-form {
+    padding-top: 19px;
+    position: relative;
+
+    .fieldset {
+      display: flex;
+      width: 508px;
+      justify-content: space-between;
+      margin-bottom: 12px;
+
+      .field-val {
+        flex: 0 310px;
+
+        .radio-ctrl .radio-label:before {
+          top: 6px;
+        }
+
+        textarea.input-ctrl {
+          height: 90px;
+          width: 100%;
+        }
+      }
+
+      &.wider {
+        width: 765px;
+
+        .field-val {
+          flex: 0 568px;
+        }
+      }
+
+      label {
+        line-height: 30px;
+      }
+
+      select {
+        width: 310px;
+        height: 30px;
+        background: $white url("../../i/arrow-dn.svg") right 8px top 12px no-repeat;
+        background-size: 10px;
+      }
+
+      .input-ctrl {
+        width: 310px;
+        height: 30px;
+      }
+    }
+  }
+
+  // form-actions
+  .form-actions {
+    padding-top: 30px;
+    border-top: solid 1px $silver;
+    margin-top: 30px;
+
+    .btn {
+      min-width: 110px;
+      margin-right: 20px;
+    }
+  }
+
+  // widget-ref
+  .widget-ref {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 372px;
+    min-height: 285px;
+    border-radius: 3px;
+    background-color: rgba($silver, 0.3);
+    color: $brownish-grey;
+    padding: 14px 22px;
+
+    h3 {
+      font-size: 20px;
+      line-height: 26px;
+      text-align: left;
+      color: $black;
+    }
+
+    .ref-status {
+      font-size: 14px;
+      line-height: 18px;
+      text-align: left;
+    }
+
+    .ref-comments {
+      margin-top: 32px;
+    }
+
+    &:before {
+      content: '';
+      position: absolute;
+      width: 4px;
+      left: 0;
+      bottom: 0;
+      top: 0;
+      background-color: transparent;
+    }
+
+    &.New {
+      &:before {
+        background-color: $greenblue;
+      }
+
+      .ref-status {
+        color: $greenblue;
+      }
+    }
+
+    &.Open {
+      &:before {
+        background-color: $rich-electric-blue;
+      }
+
+      .ref-status {
+        color: $rich-electric-blue;
+      }
+    }
+
+    &.Rejected {
+      &:before {
+        background-color: $dusty-orange;
+      }
+
+      .ref-status {
+        color: $dusty-orange;
+      }
+    }
+
+    &.Closed {
+      &:before {
+        background-color: $steel-grey;
+      }
+
+      .ref-status {
+        color: $steel-grey;
+      }
+    }
+  }
+
+  //   table-container
+  .table-container .tr.val-status:before {
+    display: none;
+  }
+
+  // email-n-form
+  .email-n-form {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 24px;
+
+    .col-view {
+      flex: 0 48%;
+    }
+
+    h3 {
+      font-size: 20px;
+      line-height: 26px;
+      text-align: left;
+      color: $black;
+    }
+
+    .notification-opts {
+      .fieldset {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 24px;
+
+        label {
+          line-height: 30px;
+        }
+
+        .val {
+          width: 280px;
+
+          li {
+            line-height: 30px;
+
+            label {
+              line-height: 18px;
+            }
+
+            &.child {
+              padding-left: 25px;
+            }
+          }
+
+          .select-ctrl {
+            height: 30px;
+            width: 100%;
+            background: $white url(../../i/arrow-dn.svg) right 8px top 14px no-repeat;
+            background-size: 10px 6px;
+          }
+        }
+
+        .radio-ctrl .radio-label {
+          vertical-align: top;
+
+          &:before {
+            top: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .table-sla {
+    .lnk-edit {
+      display: inline-block;
+      font-size: 12px;
+      line-height: 16px;
+      text-align: left;
+      color: $steel-grey;
+      padding-left: 23px;
+      background: url("../../i/pencil.svg") 0 0 no-repeat;
+      background-size: 16px 16px;
+    }
+
+    .tr {
+      .td, .th {
+        &:last-child {
+          flex: 0 80px;
+        }
+      }
+    }
+  }
+
+  .input-ctrl {
+    width: 40px;
+    height: 30px;
+    line-height: 30px;
+    vertical-align: top;
+    font-size: 14px;
+
+    &.sla-input {
+      text-align: center;
+      padding: 0 2px;
+      margin-right: 8px;
+    }
+  }
+
+  .select-ctrl {
+    width: 75px;
+    height: 30px;
+    line-height: 30px;
+    vertical-align: top;
+    margin: 0 5px;
+    font-size: 12px;
+    background: $white url(../../i/arrow-dn.svg) right 8px top 13px no-repeat;
+    background-size: 10px;
+  }
+
+  // table-sla
+  .table-sla {
+    .tr {
+      .td, .th {
+        &:nth-child(2) {
+          flex: 0 150px;
+        }
+
+        &:nth-child(3) {
+          flex: 0 190px;
+          justify-content: flex-end;
+          text-align: right;
+          padding-right: 30px;
+        }
+      }
+    }
+
+    .tbody {
+      .tr {
+        .td:nth-child(3) {
+          .group {
+            .btn {
+              &:last-child {
+                margin-left: 5px;
+              }
+
+              vertical-align: top;
+            }
+          }
+        }
+
+        &.editable {
+          background-color: $duck-egg-blue;
+
+          .td:nth-child(2) {
+            padding-top: 8px;
+          }
+
+          .td:nth-child(3) {
+            padding-top: 8px;
+          }
+          .select-ctrl{
+            padding-left: 4px;
+          }
+        }
+      }
+    }
+  }
+}

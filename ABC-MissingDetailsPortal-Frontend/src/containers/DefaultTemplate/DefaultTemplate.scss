@@ -1,0 +1,30 @@
+@import "../../styles/_mixins.scss";
+
+// pageview
+.pageview {
+  min-width: 1024px;
+  overflow: auto;
+  min-height: $min-height;
+  position: relative;
+
+  .sidebar {
+    width: 150px;
+    position: fixed;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow: auto;
+  }
+
+  .main {
+    margin-left: 150px;
+    min-height: $min-height;
+    min-width: 1166px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+    padding-top: 60px;
+    overflow: auto;
+  }
+}

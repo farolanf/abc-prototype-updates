@@ -1,0 +1,29 @@
+p.
+  Dear #{user.firstName}
+br
+p.
+  Please find below the Front End Portal Dashboard containing all your queries:
+table(style={'border-collapse': 'collapse', border: '1px solid black'})
+  thead
+    tr(style={'text-align': 'left'})
+      th(style={border: '1px solid black'}) Query Type
+      th(style={border: '1px solid black', width: '150px'}) Open
+      th(style={border: '1px solid black', width: '150px'}) Closed
+      th(style={border: '1px solid black', width: '150px'}) Rejected
+  tbody
+    each row in rows
+      tr
+        td(style={'font-weight': 'bold', border: '1px solid black'}) #{row.type}
+        td(style={border: '1px solid black', width: '150px'}) #{row.Open}
+        td(style={border: '1px solid black', width: '150px'}) #{row.Closed}
+        td(style={border: '1px solid black', width: '150px'}) #{row.Rejected}
+br
+p.
+Please access this link to go to the #[a(href=appBase) Front End Portal],&nbsp;
+if user.role === 'ContractAdminUser'
+  span review the queries and proceed with the invoicing process.
+else
+  span review and respond to the Open queries.
+br
+p Thank you,
+p MPS EMEA Invoicing Team

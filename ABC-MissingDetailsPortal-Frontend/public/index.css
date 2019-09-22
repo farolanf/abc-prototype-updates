@@ -1,0 +1,24 @@
+.App {
+  min-height: 100vh;
+  position: relative;
+  background: #fff;
+}
+
+.App:after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 30px);
+  top: calc(50% - 30px);
+  background: url('./i/logo@2x.png') 50% 50% no-repeat;
+  background-size: 60px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+#root{
+  opacity: 1;
+  transition: 0.2s;
+}
+#root.loading{
+  opacity: 0;
+}

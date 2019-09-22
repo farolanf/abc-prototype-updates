@@ -1,0 +1,1864 @@
+openapi: "3.0.0"
+info:
+  title: ABC - Missing Details Portal REST API
+  description: |
+    REST API for the ABC - Missing Details Portal.
+
+    <b>Authentication</b>: please note that /login will redirect to the  the external SSO service that will be provided later (and will be mocked for now). SSO will return the user role. If success the token should be generated, saved and returned to client. The token will be passed by the client/frontend in all subsequent requests.  
+    
+    <b>Authorization</b>: authorization will be done by the app. Please check the 'Authorization:' comments in this specification.
+    
+    <b>Export</b>: the exporting of queries will be performed by specifying the 'Accept' header in GET /queries endpoint.
+    
+    <b>References in POST/PUT:</b> please note that fully populated child/reference entities shouldn't be passed in POST and PUT requests, only the ids of the entities. For example, when creating Query, only ids of the ExceptionType, Country, Users, etc. should be passed, but not the whole entities.   
+      
+  version: "1.0"
+# the domain of the service, it will be updated in final deployment
+servers:
+  - url: /api/{apiVersion}/
+    variables:
+      apiVersion:
+        default: '1.0'
+        description: The REST API version
+security:
+  - bearerAuth: [] 
+
+paths:
+  /saml/login:
+    get:
+      summary: Login
+      description: |
+        This endpoint will generate a url point to SAML identity provider SSO login page.
+
+        Authorization: All
+      tags:
+        - Security
+      security: []    # no authentication
+      responses:
+        302:
+          description: |
+            Redirect to sso login page
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+  /saml/metadata.xml:
+    get:
+      summary: metadata of this saml service provider
+      description: the api act as a service provider in the saml sso authorization system, this endpoint will return its metadata in xml format
+      tags:
+        - Security
+      security: []    # no authentication
+      responses:
+        200:
+          description: The metadata.
+          content:
+            text/xml:
+              schema:
+                type: string
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+  /saml/assert:
+    post:
+      summary: verify saml authorization response and parse user details
+      description: after login at saml identity provider side, the identity provider will post user details back to this endpoint, this endpoint will verify the response message, parse user details and generate access token for the user
+      tags:
+        - Security
+      security: []    # no authentication
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                SAMLResponse:
+                  type: string
+                RelayState: 
+                  type: string
+      responses:
+        302:
+          description: |
+            Redirect to frontend app
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+      
+
+  /logout:
+    post:
+      summary: Log out.
+      description: |
+        Logging out. It requires authentication.
+      tags:
+        - Security
+      responses:
+        204:
+          description: Successfully logged out.
+        401:
+          $ref: '#/components/responses/NotAuthorized'   
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+  /users:
+    get:
+      summary: Search Users.
+      description: |
+        Search Users. 
+
+        Authorization: All
+      tags:
+        - User
+      parameters:
+        - name: keyword
+          in: query
+          description: The keyword. Searching should be performed for first and last name and email.
+          required: false
+          schema:
+            type:  string
+        - name: name
+          in: query
+          description: The user name. Searching should be performed for first and last name.
+          required: false
+          schema:
+            type:  string
+        - name: createdOn
+          in: query
+          description: The created date.
+          required: false
+          schema:
+            type:  string
+            format: date
+        - name: email
+          in: query
+          description: The email.
+          required: false
+          schema:
+            type:  string
+        - name: status
+          in: query
+          description: The user status.
+          required: false
+          schema:
+            type:  string
+            enum: [Active,Blocked]
+        - name: roles
+          in: query
+          description: the comma separated roles
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: sortBy
+          in: query
+          description: The sort order
+          required: false
+          schema:
+            type: string
+            enum: [name,role,status,createdOn,email]
+        - $ref: '#/components/parameters/sortOrder'
+      responses:
+        200:
+          description: The operation succeeded. The search result will be returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer    
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+    post:
+      summary: Create User.
+      description: |
+        Create User. 
+
+        Authorization: SuperUser
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User' 
+      responses:
+        200:
+          description: The User.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'                 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+
+  /users/{id}:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Get the User.
+      description: |
+        Retrieve the User.
+
+        Authorization: All
+      tags:
+        - User
+      responses:
+        200:
+          description: The user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+    put:
+      summary: Update User.
+      description: |
+        Update user.
+
+        Authorization:  SuperUser
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User' 
+      responses:
+        200:
+          description: The User.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'                 
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+
+    patch:
+      summary: Perform partial update of the User entity. Only passed attributes will be updated.
+      description: |
+        Update User partially. 
+        
+        Authorization: SuperUser
+      tags:
+        - User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User' 
+      responses:
+        200:
+          description: The User.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'                 
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+    delete:
+      summary: Delete the User entity.
+      description: |
+        Delete the User. 
+        
+        Authorization: SuperUser
+      tags:
+        - User
+      responses:
+        204:
+          description: Success             
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'                
+
+  /me: 
+    get:
+      summary: Get current User.
+      description: |
+        Retrieve the current User. The user will be identified by the token.
+
+        Authorization: All
+      tags:
+        - User
+      responses:
+        200:
+          description: The operation succeeded. The entity will be returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+ 
+  /queries:
+    get:
+      summary: Search Queries. 
+      description: |
+        Search Queries. This endpoint will also be used for exporting by specifying the 'Accept' header.
+
+        Authorization: All
+      tags:
+        - Query
+      parameters:
+        - name: queryIds
+          in: query
+          description: the comma separated query ids
+          required: false
+          schema:
+            type: string
+        - name: exceptionTypeIds
+          in: query
+          description: the comma separated ids of the exception types.
+          required: false
+          schema:
+            type: string
+        - name: accountName
+          in: query
+          description: the account name
+          required: false
+          schema:
+            type: string
+        - name: ampId
+          in: query
+          description: the AMP ID 
+          required: false
+          schema:
+            type: string
+        - name: sapContract
+          in: query
+          description: the SAP Contract
+          required: false
+          schema:
+            type: string
+        - name: countryId
+          in: query
+          description: the id of the country.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: sdmId
+          in: query
+          description: the id of the SDM.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: requestorId
+          in: query
+          description: the id of the requestor.
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: statuses
+          in: query
+          description: the comma separated statuses
+          required: false
+          schema:
+            type: string
+        - name: dueDateStart
+          in: query
+          description: the due date start.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: dueDateEnd
+          in: query
+          description: the due date end.
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: comment
+          in: query
+          description: the comment.
+          required: false
+          schema:
+            type: string
+        - name: priority
+          in: query
+          description: the priority.
+          required: false
+          schema:
+            type: string
+        - name: viewType
+          in: query
+          description: the view type
+          required: false
+          schema:
+            type: string
+            enum: [Expanded,Collapsed]
+            default: Expanded
+        - name: watchList
+          in: query
+          description: the watch list flag, if true the watched queries will be returned and the filter params will be ignored.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: myOnly
+          in: query
+          description: if true only show queries of current user, only appliable to Delivery user and Management user
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - name: sortBy
+          in: query
+          description: The sort order
+          required: false
+          schema:
+            type: string
+            enum: [id,exceptionTypeId,countryId,accountName,ampId,billingIndex,billingStartDate,billingEndDate,sapContract,valueToBeBilled,currencyId,sdmId,requestorId,dueDate,reviseDate,openedDate,closedDate,rework,reworkReason,dmpsPmps,status,updatedOn]
+        - $ref: '#/components/parameters/sortOrder'
+        - $ref: '#/components/parameters/acceptHeader'
+      responses:
+        200:
+          description: OK - The operation succeeded. The search result will be returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Query'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer  
+            application/xls:
+              schema:
+                type: string
+                format: binary 
+            text/csv: 
+              schema:
+                type: string
+                format: binary 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+ 
+    post:
+      summary: Create Query.
+      description: |
+        Create Query. The attachments are uploaded using POST /file endpoint and are then referenced by Query. The requestor is identified by the token. dueDate will be calculated as openedDate+SLA for this exception type.
+
+        Authorization: ContractAdminUser
+      tags:
+        - Query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                query:
+                  $ref: '#/components/schemas/Query'
+      responses:
+        200:
+          description: The Query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'                 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+ 
+
+  /queries/{id}/:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Get the Query by id. Please note, that this endpoint has a side effect
+      description: |
+        Retrieve the Query.
+
+        Authorization: All
+      tags:
+        - Query
+      responses:
+        200:
+          description: The Query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'                             
+ 
+    put:
+      summary: Update Query.
+      description: |
+        Update Query. 
+
+        Authorization:  ContractAdminUser
+      tags:
+        - Query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                query:
+                  $ref: '#/components/schemas/Query' 
+                attachments:
+                  type: array 
+                  items: 
+                    type: string
+                    format: binary
+      responses:
+        200:
+          description: The Query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'                 
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+
+    patch:
+      summary: Perform partial update of the Query entity. Only passed attributes will be updated.
+      description: |
+        Update Query partially. 
+        
+        Authorization: ContractAdminUser
+      tags:
+        - Query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                query:
+                  $ref: '#/components/schemas/Query' 
+      responses:
+        200:
+          description: The Query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Query'                 
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+        
+  /reassignQueries:
+    patch:
+      summary: Reassign Queries to different SDM.
+      description: |
+        Reassign Queries to different SDM. 
+        
+        Authorization: All
+      tags:
+        - Query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                queryIds:
+                  type: array
+                  items:
+                    type: integer
+                    format: int64 
+                userId:
+                  type: integer
+                  format: int64 
+      responses:
+        204:
+          description: OK - The operation succeeded.                
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+  /importQueries:
+    post:
+      summary: Import Queries from file.
+      description: |
+        Import Queries. It is a ZIP file, consisting of a CSV file and multiple attachment files.
+        In case of error this endpoint will send an email to the requestor, referencing the queries which were not created.
+
+        Authorization: ContractAdminUser
+      tags:
+        - Query
+      requestBody:
+        content:
+          text/csv:
+            schema: 
+                type: string
+                format: binary
+      responses:
+        200:
+          description: The Query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  createdQueries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Query'
+                  errors:
+                    type: array
+                    items:
+                      type: string                 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+
+  /queries/{id}/watch:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    put:
+      summary: Watch the Query.
+      description: |
+        Watch the Query.
+      tags:
+        - Query
+      responses:
+        204:
+          description: OK - The operation succeeded.   
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+
+  /queries/{id}/unwatch:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    put:
+      summary: Unwatch the Query.
+      description: |
+        Unwatch the Query.
+      tags:
+        - Query
+      responses:
+        204:
+          description: OK - The operation succeeded.   
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+
+  /queries/{id}/watchers:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Get the watchers of the Query.
+      description: |
+        Get the watchers of the Query. 
+        
+        Authorization: All
+      tags:
+        - Query
+      responses:
+        200:
+          description: The Users watching this query.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'                 
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+    patch:
+      summary: Update watchers of the query.
+      description: |
+        Update watchers of the query.
+        
+        Authorization: All
+      tags:
+        - Query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: integer
+                    format: int64 
+      responses:
+        204:
+          description: OK - The operation succeeded.                
+        400:
+          $ref: '#/components/responses/BadRequest' 
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+
+  /queries/{id}/sdmComment:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Get the SDM Comment for the given query.
+      description: |
+        Retrieve the SDM Comment.
+      tags:
+        - Query
+      responses:
+        200:
+          description: The SDM Comment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDMComment'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+
+
+  /sdmComments:
+    post:
+      summary: Create SDM comment for a single query or multiple queries.
+      description: |
+        Create SDM comment. This endpoint has side effect as it updates the Query status. The attachments are uploaded using POST /file endpoint and are then referenced by SDMComment.
+      tags:
+        - Query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SDMComment'      
+      responses:
+        200:
+          description: The SDM Comment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDMComment'                 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        500:
+          $ref: '#/components/responses/InternalServerError'    
+
+
+  /sdmComments/{id}:
+    parameters:  
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Get the SDM Comment by id.
+      description: |
+        Retrieve the SDM Comment.
+      tags:
+        - Query
+      responses:
+        200:
+          description: The SDM Comment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SDMComment'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'                             
+
+  /notifications:
+    get:
+      summary: Get user's notifications.
+      description: |
+        Get user's notifications. The current user will be identified by token.
+      tags:
+        - Notification
+      parameters:           
+        - name: status
+          in: query
+          description: The status
+          required: false
+          schema:
+            type: string
+            enum: [New,Read]
+        - name: startDate
+          in: query
+          description: The start date
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: The start date
+          required: false
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+
+      responses:
+        200:
+          description: The search result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer                  
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+   
+  /notifications/{id}:
+    get:
+      summary: Get Notification.
+      description: |
+        Get Notification.
+        
+        Authorization: Only owner of this notification (userId == notification.userId) can perform this action. 
+      tags:
+        - Notification
+      parameters:  
+        - $ref: '#/components/parameters/id'
+      responses:
+        200:
+          description: The Notification.
+          content:
+            application/json:
+              schema:                
+                $ref: '#/components/schemas/Notification'                
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'        
+
+  /notifications/{id}/read:
+    put:
+      summary: Mark user's notification as read.
+      description: |
+        Mark user's notification as read.
+        
+        Authorization: Only owner of this notification (userId == notification.userId) can perform this action. 
+      tags:
+        - Notification
+      parameters:  
+        - $ref: '#/components/parameters/id'
+      responses:
+        204:
+          description: OK - The operation succeeded.            
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'         
+ 
+
+  /markAllNotificationsAsRead:
+    put:
+      summary: Mark all user's notification as read.
+      description: |
+        Mark all user's notification as read.
+      tags:
+        - Notification
+      responses:
+        204:
+          description: OK - The operation succeeded.            
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+
+  /files:
+    post:
+      summary: Upload file. The file then can be referenced by Query or SDMComment. Please note, that there should be a batch job responsible for cleaning the files which aren't referenced by Query or SDMComment.
+      description: |
+        Upload file.
+
+        Authorization: All
+      tags:
+        - File
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: string
+              format: binary
+      responses:
+        200:
+          description: The File.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/File'                 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+  
+  /files/{id}:
+    delete:
+      summary: Delete the File.
+      description: |
+        Delete the File. 
+        
+        Authorization: Only uploader of the file can delete it.
+      tags:
+        - File
+      parameters:  
+        - $ref: '#/components/parameters/id'
+      responses:
+        204:
+          description: Success             
+        401:
+          $ref: '#/components/responses/NotAuthorized'    
+        403:
+          $ref: '#/components/responses/Forbidden' 
+        404:
+          $ref: '#/components/responses/NotFound' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+  /countries:
+    get:
+      summary: Get all Countries. 
+      description: |
+        Get all Countries
+      tags:
+        - Lookup
+      responses:
+        200:
+          description: OK - The operation succeeded. The entities will be returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country' 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+       
+  /currencies:
+    get:
+      summary: Get all Currencies. 
+      description: |
+        Get all Currencies
+      tags:
+        - Lookup
+      responses:
+        200:
+          description: OK - The operation succeeded. The entities will be returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country' 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'                           
+ 
+  /exceptionTypes:
+    get:
+      summary: Get all ExceptionTypes. 
+      description: |
+        Get all ExceptionTypes
+      tags:
+        - Lookup
+      responses:
+        200:
+          description: OK - The operation succeeded. The entities will be returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExceptionType' 
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+
+  /globalStatistics:
+    get:
+      summary: Get Global Statistics.
+      description: |
+        Get Global Statistics.
+      tags:
+        - Statistics
+      responses:
+        200:
+          description: The results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalStatistics'                 
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        500:
+          $ref: '#/components/responses/InternalServerError' 
+
+  /slaSettings:
+    get:
+      summary: Get SLA Settings.
+      description: |
+        Get SLA Settings.
+
+        Authorization: SuperUser
+      tags:
+        - Settings 
+      responses:
+        200:
+          description: The results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLASettings'                 
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+
+    put:
+      summary: Save SLA Settings.
+      description: |
+        Get SLA Settings.
+
+        Authorization: SuperUser
+      tags:
+        - Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLASettings'  
+      responses:
+        204:
+          description: OK - The operation succeeded.            
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        500:
+          $ref: '#/components/responses/InternalServerError'  
+
+  /emailSettings:
+    get:
+      summary: Get email Settings.
+      description: |
+        Get email Settings.
+
+        Authorization: SuperUser
+      tags:
+        - Settings 
+      responses:
+        200:
+          description: The results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailSettings'                 
+        401:
+          $ref: '#/components/responses/NotAuthorized'  
+        500:
+          $ref: '#/components/responses/InternalServerError'   
+
+    put:
+      summary: save email Settings.
+      description: |
+        Get email Settings.
+
+        Authorization: SuperUser
+      tags:
+        - Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailSettings'  
+      responses:
+        204:
+          description: OK - The operation succeeded.            
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/NotAuthorized' 
+        500:
+          $ref: '#/components/responses/InternalServerError'        
+
+components:
+  #-------------------------------
+  # Security schemes
+  #-------------------------------
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  #-------------------------------
+  # Parameters
+  #-------------------------------
+  parameters:
+    page:
+      name: page
+      in: query
+      description: The page number.
+      required: false
+      schema:
+        type: integer
+        default: 1
+      example: 1
+
+    perPage:
+      name: perPage
+      in: query
+      description: The number of items to list per page.
+      required: false
+      schema:
+        type: integer
+        default: 20
+        maximum: 100
+      example: 20
+
+    sortOrder:
+      name: sortOrder
+      in: query
+      description: The sort order.
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+      example: asc
+
+    id:
+      name: id
+      in: path
+      description: The entity id.
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 2027
+
+    commentId:
+      name: commentId
+      in: path
+      description: The comment entity id.
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 2027
+      
+    acceptHeader:   
+      name: Accept
+      in: header
+      description: The accept header. This will be used for exporting.
+      required: false
+      schema:  
+        type: string
+        enum: [application/json,application/xls,text/csv]
+        default: application/json
+
+  #-------------------------------
+  # Responses
+  #-------------------------------
+  responses:
+    BadRequest:
+      description: BAD REQUEST - if there was problem with the request (e.g. malformed or some parameters are missing).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotAuthorized:
+      description: NOT AUTHORIZED - if the request didn't bear authentication information or the authentication information is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: FORBIDDEN - if the requesting user didn't have permission to perform the requested operation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: NOT FOUND - if the resource in request did not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error' 
+    InternalServerError:
+      description: INTERNAL SERVER ERROR - if the request was properly formatted, but the operation failed on the server side
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  #-------------------------------
+  # Entities
+  #-------------------------------
+  schemas:    
+    Error:
+      description: |
+        An error entity. 
+      properties:
+        message:
+          type: string
+          description: The error message.                
+
+
+    File:
+      description: |
+        The file.
+      required:
+        - name
+        - fileURL
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        name:
+          type: string
+          description: The name.
+        mimeType:
+          type: string
+          description: The MIME type.
+        fileURL:
+          type: string
+          description: The file URL.  
+        createdOn:
+          type: string
+          format: date
+          description: The created on date.  
+        createdBy:
+          type: integer
+          format: int64
+          description: The ID of the user who created this attachment.
+
+    User:
+      description: |
+        The User entity.
+      required:
+        - email
+        - role
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        employeeId:
+          type: string
+          description: The employee id.
+        firstName:
+          type: string
+          description: The first name.
+        lastName:
+          type: string
+          description: The last name.
+        email:
+          type: string
+          description: The email. 
+        profilePicture:
+          $ref: '#/components/schemas/File' 
+          description: The profile picture.   
+        role:
+          type: string
+          description: The role. 
+          enum: [DeliveryUser,ManagementUser,ContractAdminUser,SuperUser]
+        status:
+          type: string
+          description: The status. 
+          enum: [Active,Blocked]
+        createdOn:
+          type: string
+          format: date
+          description: The created on date.   
+        updatedOn:
+          type: string
+          format: date
+          description: The updated on date. 
+      example:
+        firstName: John
+        lastName: Doe
+        email: jdoe@gmail.com
+        role: DeliveryUser
+             
+
+    GlobalStatistics:
+      description: |
+        The global statistics.
+      required:
+        - numberOfTotalQueries
+        - numberOfNewQueries
+        - numberOfOpenQueries
+        - numberOfClosedQueries
+        - numberOfRejectedQueries
+      properties:
+        numberOfTotalQueries:
+          type: integer
+          description: The number of total queries.
+        numberOfNewQueries:
+          type: integer
+          description: The number of new queries.
+        numberOfOpenQueries:
+          type: integer
+          description: The number of open queries.
+        numberOfClosedQueries:
+          type: integer
+          description: The number of closed queries.  
+        numberOfRejectedQueries:
+          type: integer
+          description: The number of open queries.
+
+    Notification:
+      description: |
+        The notification.
+      required:
+        - id
+        - userId
+        - title
+        - text
+        - status
+        - createdOn
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        userId:
+          type: integer
+          format: int64
+          description: The ID of the user.
+        title:
+          type: string
+          description: The notification title. 
+          example: New poll available 
+        text:
+          type: string
+          description: The notification text.
+        relatedModel:
+          type: string
+          enum: [Query,SDMComment]
+          description: The related model.
+          example: Query    
+        relatedModelId:
+          type: integer
+          format: int64
+          description: The ID of the related model.
+        notificationType:
+          type: string
+          enum: [ClosedQueries,NewQueries,PendingQueries,RejectedQueries]
+          description: The related model.
+          example: Query   
+        status:
+          type: string
+          description: The notification status.
+          enum: [New,Read]
+        createdOn:
+          type: string
+          format: date
+          description: The created on date.   
+        readOn:
+          type: string
+          format: date
+          description: The read on date.    
+
+
+    Query:
+      description: |
+        The query. During the Query creation only ids of the reference entities like User, Country, ExceptionType etc should be passed.
+      required:
+        - queryId
+        - exceptionType
+        - country
+        - accountName
+        - ampId
+        - billingIndex
+        - billingStartDate
+        - billingEndDate
+        - sapContract
+        - valueToBeBilled
+        - currency
+        - sdm
+        - reviseDate
+        - dmpsPmps
+        - rework
+        - comment
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        exceptionType:
+          $ref: '#/components/schemas/ExceptionType' 
+          description: The exception type.
+        exceptionSubType:
+          type: string
+          description: The exception subtype.   
+        country:
+          $ref: '#/components/schemas/Country' 
+          description: The country.   
+        accountName:
+          type: string
+          description: The account name.
+        ampId:
+          type: string
+          description: The AMP ID.
+        billingIndex:
+          type: string
+          description: The billing index.              
+        billingStartDate:
+          type: string
+          format: date
+          description: The billing start date.
+        billingEndDate:
+          type: string
+          format: date
+          description: The billing end date.
+        sapContract:
+          type: string
+          description: The SAP Contract.   
+        valueToBeBilled:
+          type: number
+          format: float
+          description: The value to be billed.  
+        currency:
+          $ref: '#/components/schemas/Currency' 
+          description: The currency. 
+        sdm:
+          $ref: '#/components/schemas/User' 
+          description: The SDM.    
+        requestor:
+          $ref: '#/components/schemas/User' 
+          description: The requestor. 
+        dueDate:
+          type: string
+          format: date
+          description: The due date.
+        reviseDate:
+          type: string
+          format: date
+          description: The revise date.
+        openedDate:
+          type: string
+          format: date
+          description: The opened date and time.
+        closedDate:
+          type: string
+          format: date
+          description: The closed date and time.
+        aging:
+          type: string
+          description: The ageing. Calculated field.
+        rework:
+          type: boolean
+          description: Rework flag.
+        reworkReason:
+          type: boolean
+          description: The rework reason.
+        dmpsPmps:
+          type: string
+          enum: [dMPS,pMPS]
+        comment:
+          type: string
+          description: The comment.
+        status:
+          type: string
+          description: The status.
+          enum: [New,Open,Closed,Rejected]
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/File' 
+          description: The attachments. 
+        createdOn:
+          type: string
+          format: date
+          description: The created on date.   
+      example:
+        queryId: 1234567
+        accountName: Customer ABC
+        ampId: 80TB0040
+        sapContract: 2134964528
+        country: 
+          $ref: "#/components/schemas/Country/example"
+        exceptionType: 
+          $ref: "#/components/schemas/ExceptionType/example"
+        sdm: 
+          $ref: "#/components/schemas/User/example"
+        requestor: 
+          $ref: "#/components/schemas/User/example"
+        billingIndex: 12345
+        status: New
+
+    ExceptionType:
+      description: |
+        The Exception Type entity. 
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        name:
+          type: string
+          description: The name.
+      example:
+        id: 123456
+        name: IBR approval  
+
+    Currency:
+      description: |
+        The Currency entity.
+      required:
+      - id
+      - name  
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        name:
+          type: string
+          description: The name.  
+        symbol:
+          type: string
+          description: The name. 
+      example:
+        id: 123456
+        name: dollar
+        symbol: $
+
+    Country:
+      description: |
+        The Country entity.
+      required:
+      - id
+      - name 
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        name:
+          type: string
+          description: The name.  
+      example:
+        id: 1234567
+        name: United States
+
+    SDMComment:
+      description: |
+        The SDM Comment entity. 
+      required:
+        - text
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        queryIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          description: The IDs of the query.
+        text:
+          type: string
+          description: The comment text.
+        sdm:
+          $ref: '#/components/schemas/User' 
+        status:
+          type: string
+          enum: [Closed,Rejected]
+          description: The status of the related queries.
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/File' 
+          description: The attachments. 
+        createdOn:
+          type: string
+          format: date
+          description: The created on date.   
+      example:
+        id: 1234568
+        queryIds: [1234567]
+        text: Confirmed!
+        sdm:
+          $ref: "#/components/schemas/User/example"
+        status: closed
+
+    SLASettings:
+      description: |
+        The SLA settings. 
+      required:
+        - QueryTypeSLAs
+      properties:
+        queryTypeSLAs:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryTypeSLA'     
+
+    QueryTypeSLA:
+      description: |
+        The SLA settings. 
+      required:
+        - exceptionTypeId
+        - number
+        - units
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the entity.
+        exceptionTypeId:
+          type: integer
+          format: int64
+          description: The ID of the exception ype.
+        number:
+          type: integer
+          description: The number in units for this query type.
+        units:
+          type: string
+          enum: [Minutes,Hours,Days]
+ 
+    EmailSettings:
+      description: |
+        The email settings. 
+      properties:
+        contractUserEmailSettings:
+          $ref: '#/components/schemas/ContractUserEmailSettings' 
+        deliveryAndManagementUserEmailSettings:
+          $ref: '#/components/schemas/DeliveryAndManagementUserEmailSettings'   
+
+
+    ContractUserEmailSettings:
+      description: |
+        The contract user role email settings. 
+      required:
+        - emailsFrequency
+        - newQueries
+        - openQueries
+        - closedQueries
+      properties:
+        emailsFrequency:
+          type: string
+          enum: [OnceADay,TwiceADay,Never]
+          description: The emails frequency.
+        newQueries:
+          type: boolean
+          description: Flag if email should include number of new queries.
+        openQueries:
+          type: boolean
+          description: Flag if email should include number of open queries.
+        closedQueries:
+          type: boolean
+          description: Flag if email should include number of closed queries.
+
+    DeliveryAndManagementUserEmailSettings:
+      description: |
+        The delivery and management user role email settings. 
+      required:
+        - emailsFrequency
+        - newQueries
+        - openQueries
+        - closedQueries
+      properties:
+        emailsFrequency:
+          type: string
+          enum: [OnceADay,TwiceADay,Never]
+          description: The emails frequency.
+        newQueries:
+          type: boolean
+          description: Flag if email should include number of new queries.
+        openQueries:
+          type: boolean
+          description: Flag if email should include number of open queries.
+        closedQueries:
+          type: boolean
+          description: Flag if email should include number of closed queries.
+        exceptionTypeIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+          description: The ids of the exceptionTypes for which notifications should be sent.

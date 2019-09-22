@@ -1,0 +1,56 @@
+/* fonts */
+// HPSimplified
+@font-face {
+  font-family: 'HPSimplified';
+  src: url("../fonts/hpsimplified/hpsimplified_it-webfont.woff2") format("woff2"), url("../fonts/hpsimplified/hpsimplified_it-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'HPSimplified';
+  src: url("../fonts/hpsimplified/hpsimplified_lt-webfont.woff2") format("woff2"), url("../fonts/hpsimplified/hpsimplified_lt-webfont.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HPSimplified';
+  src: url("../fonts/hpsimplified/hpsimplified_ltit-webfont.woff2") format("woff2"), url("../fonts/hpsimplified/hpsimplified_ltit-webfont.woff") format("woff");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'HPSimplified';
+  src: url("../fonts/hpsimplified/hpsimplified_rg-webfont.woff2") format("woff2"), url("../fonts/hpsimplified/hpsimplified_rg-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HPSimplified';
+  src: url("../fonts/hpsimplified/hpsimplified-bold-webfont.woff2") format("woff2"), url("../fonts/hpsimplified/hpsimplified-bold-webfont.woff") format("woff"), url("../fonts/hpsimplified/hpsimplified-bold-webfont.svg#hp_simplifiedbold") format("svg");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HPSimplified';
+  src: url("../fonts/hpsimplified/hpsimplified-bold-italic-webfont.woff2") format("woff2"), url("../fonts/hpsimplified/hpsimplified-bold-italic-webfont.woff") format("woff"), url("../fonts/hpsimplified/hpsimplified-bold-italic-webfont.svg#hp_simplifiedbold_italic") format("svg");
+  font-weight: bold;
+  font-style: italic;
+}
+
+/*LIGHT*/
+@font-face{
+  font-family: 'HPSimplifiedLight';
+  src: url('../fonts/hpsimplified/latin-e-light-eot.eot'); /* IE9 compat */	 
+  src: url('../fonts/hpsimplified/latin-e-light-eot.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */	
+  /* non-IE */ 
+  url('../fonts/hpsimplified/latin-e-light-woff.woff') format('-woff.woff'), /*IE9 and some modern browsers*/ 
+  url('../fonts/hpsimplified/latin-e-light-ttf.ttf') format('truetype'); /*iOS, Android, Safari*/
+
+  font-weight: normal;
+  font-style: normal;
+}

@@ -1,0 +1,113 @@
+@import "../../styles/imports";
+
+// filter-query-table styles
+.filter-query-table {
+  min-height: 340px;
+  border-radius: 3px;
+  background-color: $white-two;
+  padding: 26px 18px;
+  position: relative;
+  display: none;
+
+    &.open{
+      display: block;
+    }
+
+  .close-filter {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    background: url("../../i/multiply.svg") 0 0 no-repeat;
+    background-size: 16px;
+    border-top: 1px solid transparent;
+  }
+
+  .select-ctrl {
+    width: 200px;
+    height: 30px;
+    background: $white url("../../i/arrow-dn.svg") right 8px top 12px no-repeat;
+    background-size: 10px;
+    font-size: 14px;
+
+    &.md {
+      width: 260px;
+    }
+  }
+
+  .filter-header {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .filter-actions {
+    border-top: 1px solid $silver;
+    padding-top: 20px;
+
+    .btn {
+      height: 40px;
+      line-height: 40px;
+      margin-right: 10px;
+      font-size: 16px;
+      width: 110px;
+    }
+  }
+
+  // filter-body
+  .filter-body {
+    min-height: 199px;
+    display: flex;
+    justify-content: space-between;
+
+    .col-filter {
+      flex: 0 30%;
+    }
+  }
+
+  .input-ctrl {
+    width: 200px;
+    height: 30px;
+    font-size: 14px;
+
+    &.md {
+      width: 260px;
+    }
+
+    &.datepicker {
+      width: 115px;
+    }
+  }
+
+  textarea {
+    &.input-ctrl {
+      height: 75px;
+      line-height: 16px;
+    }
+  }
+
+  .fieldset {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+
+    label {
+      line-height: 30px;
+    }
+  }
+  .date-range{
+    display: flex;
+
+    .to{
+      padding: 0 7px;
+      line-height: 30px;
+    }
+    .datepicker-wrap .react-datepicker-popper{
+      left: -100px !important;
+
+      .react-datepicker__triangle{
+        left: 130px;
+      }
+    }
+  }
+}

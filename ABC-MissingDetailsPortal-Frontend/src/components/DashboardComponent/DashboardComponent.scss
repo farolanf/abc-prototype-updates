@@ -1,0 +1,216 @@
+@import "../../styles/imports";
+
+// subpage styles
+.subpage {
+  .page-header {
+    padding-top: 23px;
+
+    .page-title {
+      font-size: 24px;
+      line-height: 32px;
+      text-align: left;
+      color: $black;
+      padding-bottom: 12px;
+    }
+
+    // addquery-section
+    .addquery-section {
+      width: 176px;
+      height: 60px;
+      border-radius: 3px;
+      background-color: $rich-electric-blue;
+      font-size: 16px;
+      line-height: 16px;
+      text-align: left;
+      color: $white;
+      display: flex;
+      display: none;
+
+      a{
+        color: $white;
+      }
+
+      .add-q{
+        flex: 0 65px;
+        border-left: 1px solid rgba(255, 255, 255, 0.2);
+        padding-left: 10px;
+        padding-top: 12px;
+
+        &:nth-child(1){
+          flex: 0 47px;
+        }
+        &:nth-child(3){
+          flex: 0 75px;
+        }
+
+        &.add-ico{
+          background: url('../../i/add.svg') 50% 50% no-repeat;
+          background-size: 26px;
+        }
+      }
+    }
+
+    .ContractAdminUser{
+      .addquery-section{
+        display: flex;
+      }
+    }
+  }
+
+  .title-alt {
+    font-size: 20px;
+    line-height: 26px;
+    text-align: left;
+    color: $black;
+    margin-top: 24px;
+  }
+
+  .table-view-opts {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+
+    .list {
+      display: flex;
+
+      li {
+        font-size: 14px;
+        line-height: 28px;
+        text-align: left;
+        color: $steel-grey;
+        cursor: pointer;
+        padding-bottom: 8px;
+        border-bottom: 3px solid transparent;
+        margin-left: 30px;
+
+        &:first-child {
+          margin-left: 0;
+        }
+
+        &.on {
+          border-bottom: 3px solid $peacock-blue;
+        }
+      }
+    }
+
+    .query-btns {
+      padding-bottom: 9px;
+
+      .btn {
+        margin-left: 10px;
+
+        .ico-excel {
+          padding-left: 23px;
+          background: url("../../i/ms_excel.svg") 0 50% no-repeat;
+          background-size: 16px 16px;
+        }
+
+        .ico-manage-cols {
+          padding-left: 23px;
+          background: url("../../i/manage.svg") 0 50% no-repeat;
+          background-size: 16px 16px;
+        }
+
+        .ico-filter {
+          padding-left: 23px;
+          background: url("../../i/filter.svg") 0 50% no-repeat;
+          background-size: 16px 16px;
+        }
+      }
+
+      &.ManagementUser{
+        .off-management_user{
+          display: none;
+        }
+      }
+    }
+  }
+
+  // list-seleced-opts
+  .list-seleced-opts {
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+      margin-left: 10px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+
+    .selected-queries {
+      height: 30px;
+      line-height: 28px;
+      border-radius: 3px;
+      background-color: $white;
+      border: solid 1px $steel-grey;
+      padding: 0 10px;
+      font-size: 14px;
+      text-align: left;
+      color: $black;
+
+      .seprator {
+        color: $silver;
+        margin: 0 4px;
+      }
+    }
+  }
+}
+
+// metavalues styles
+.metavalues {
+  display: flex;
+  justify-content: space-between;
+
+  &.ContractAdminUser {
+    .metavalue {
+      flex: 0 15.5%;
+    }
+  }
+
+  .metavalue {
+    flex: 0 19%;
+    max-width: 215px;
+    height: 60px;
+    background-color: $white;
+    border: solid 1px $silver;
+    border-left: 5px solid $peacock-blue;
+    padding: 8px 5px 0 20px;
+
+    &.nmq {
+      border-left: 5px solid $greenblue;
+    }
+
+    &.omq {
+      border-left: 5px solid $rich-electric-blue;
+    }
+
+    &.cmq {
+      border-left: 5px solid $steel-grey;
+    }
+
+    &.rmq {
+      border-left: 5px solid $dusty-orange;
+    }
+
+    h4 {
+      font-size: 24px;
+      line-height: 26px;
+      color: $black;
+    }
+
+    .lbl-m {
+      font-size: 14px;
+      line-height: 18px;
+      text-align: left;
+      color: $steel-grey;
+    }
+  }
+
+  &.ContractAdminUser{
+    .metavalue{
+      flex: 0 15%;
+    }
+  }
+}

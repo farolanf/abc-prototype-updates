@@ -1,0 +1,220 @@
+@import "../../styles/imports";
+
+// single-query-form
+.single-query-form {
+  .page-header {
+    display: flex;
+    padding-top: 23px;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $silver;
+
+    .page-title {
+      padding-bottom: 0;
+    }
+  }
+
+  .title-subpage {
+    margin-top: 24px;
+    font-size: 20px;
+    line-height: 26px;
+    text-align: left;
+    color: $black;
+    margin-bottom: 14px;
+  }
+
+  // query-form
+  .query-form {
+    padding-top: 19px;
+    position: relative;
+
+    .fieldset {
+      display: flex;
+      width: 508px;
+      justify-content: space-between;
+      margin-bottom: 12px;
+
+      .field-val {
+        flex: 0 310px;
+
+        .radio-ctrl .radio-label:before {
+          top: 6px;
+        }
+
+        textarea.input-ctrl {
+          height: 90px;
+          width: 100%;
+        }
+      }
+
+      &.wider {
+        width: 765px;
+
+        .field-val {
+          flex: 0 568px;
+        }
+      }
+
+      label {
+        line-height: 30px;
+      }
+
+      select {
+        width: 310px;
+        height: 30px;
+        background: $white url("../../i/arrow-dn.svg") right 8px top 12px no-repeat;
+        background-size: 10px;
+      }
+
+      .input-ctrl {
+        width: 310px;
+        height: 30px;
+      }
+    }
+  }
+
+  // form-actions
+  .form-actions {
+    padding-top: 30px;
+    border-top: solid 1px $silver;
+    margin-top: 30px;
+
+    .btn {
+      min-width: 110px;
+      margin-right: 20px;
+    }
+  }
+
+  // widget-ref
+  .widget-ref {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 372px;
+    min-height: 285px;
+    border-radius: 3px;
+    background-color: rgba($silver, 0.3);
+    color: $brownish-grey;
+    padding: 14px 22px;
+
+    h3 {
+      font-size: 20px;
+      line-height: 26px;
+      text-align: left;
+      color: $black;
+    }
+
+    .ref-status {
+      font-size: 14px;
+      line-height: 18px;
+      text-align: left;
+    }
+
+    .ref-comments {
+      margin-top: 32px;
+    }
+
+    &:before {
+      content: '';
+      position: absolute;
+      width: 4px;
+      left: 0;
+      bottom: 0;
+      top: 0;
+      background-color: transparent;
+    }
+
+    &.New {
+      &:before {
+        background-color: $greenblue;
+      }
+
+      .ref-status {
+        color: $greenblue;
+      }
+    }
+
+    &.Open {
+      &:before {
+        background-color: $rich-electric-blue;
+      }
+
+      .ref-status {
+        color: $rich-electric-blue;
+      }
+    }
+
+    &.Rejected {
+      &:before {
+        background-color: $dusty-orange;
+      }
+
+      .ref-status {
+        color: $dusty-orange;
+      }
+    }
+
+    &.Closed {
+      &:before {
+        background-color: $steel-grey;
+      }
+
+      .ref-status {
+        color: $steel-grey;
+      }
+    }
+  }
+
+  //   table-container
+  .table-container .tr.val-status:before {
+    display: none;
+  }
+
+  // files-dropped
+  .files-dropped {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    overflow: hidden;
+
+    .file-el {
+      min-width: 276px;
+      height: 30px;
+      line-height: 30px;
+      border-radius: 3px;
+      background-color: $white-two;
+      padding: 0 12px;
+      position: relative;
+      margin-bottom: 10px;
+      flex: 0 49%;
+      max-width: 49%;
+      font-size: 12px;
+      text-align: left;
+      padding-right: 30px;
+      color: $rich-electric-blue;
+
+      .remove {
+        width: 14px;
+        height: 16px;
+        background: url("../../i/trash.svg") 0 0 no-repeat;
+        background-size: 13px;
+        position: absolute;
+        right: 10px;
+        top: 5px;
+      }
+    }
+  }
+  .search-field{
+    position: relative;
+    .popup-window {
+      top: 36px;
+      left: 0;
+      .search-bar {
+        .input-ctrl {
+          width: 250px;
+          -webkit-appearance: none;
+        }
+      }
+    }
+  }
+}

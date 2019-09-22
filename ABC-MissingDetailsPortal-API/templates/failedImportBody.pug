@@ -1,0 +1,13 @@
+p.
+  Dear #{user.firstName}
+br
+p.
+  Please note that  the bulk upload was unsuccessful. During the process the following details were not accepted by the Front End Portal:
+ol
+  each failure in failures
+    li #{failure.error}
+p.
+  In order for the queries to be generated please fix the above issue and repeat the bulk upload process.
+br
+p Thank you,
+p MPS EMEA Invoicing Team
