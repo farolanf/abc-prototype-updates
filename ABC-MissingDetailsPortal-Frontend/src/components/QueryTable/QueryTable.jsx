@@ -81,8 +81,22 @@ class QueryTable extends Component {
       selectedQuery: null,
       reassignSdmInput: '',
       commentInput: '',
+      emailTo: '',
+      emailSubject: '',
+      emailMessage: '',
       errors: {},
       rejectReason: 'Incomplete details'
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    // init states on showing modals
+    if (get(this.props, 'modal.isSendEmailModal') && !get(prevProps, 'modal.isSendEmailModal')) {
+      this.setState({
+        emailTo: 'Missing Info Owner; Missing Info Action Owner',
+        emailSubject: 'Escalation Notification From John Smith',
+        emailMessage: '\nDear User\n\nThe bellow items were review by John Smith and were mapped as priority in front end portal. Bellow the message sent by John Smith\n\nQuery 122;123; 124\n\nHello,\nPlease prioritize this items as it has a big amount impact.\n\nRegards'
+      })
     }
   }
 
@@ -486,7 +500,7 @@ class QueryTable extends Component {
   render() {
     const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment } = this.props;
     const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
-      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason } = this.state;
+      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage } = this.state;
     const startIndex = (dataset.page - 1) * dataset.perPage + 1;
     const endIndex = min([dataset.page * dataset.perPage, dataset.total]);
 
@@ -1237,6 +1251,54 @@ class QueryTable extends Component {
                 <div className="lt">
                   <a className="btn" onClick={() => { reassignedSdm && this.reassignQueries(map(this.getSelectedQueries(), 'id'), reassignedSdm.id) }}>Submit</a>
                   <a className="btn btn-clear" onClick={() => this.closeModal('isReassignModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-bulk-process */}
+          </div>
+        }
+
+        {
+          modal && modal.isSendEmailModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-send-email">
+              <header>
+                <h2 className="modal-title">Send Email</h2>
+                <a className="close-modal" onClick={() => this.closeModal('isSendEmailModal')}> </a>
+              </header>
+
+              <div className="modal-content pad-t-sm">
+                <div className="section">
+                  <div className="fieldset flex mb-lg">
+                    <label className="muted">To</label>
+                    <div className="field-val width-lg">
+                      <input className="input-ctrl font-md text-black" value={emailTo} onChange={e => this.handleChange('emailTo', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="fieldset flex mb-0">
+                    <label className="muted">Subject</label>
+                    <div className="field-val width-lg">
+                      <input className="input-ctrl font-md text-black" value={emailSubject} onChange={e => this.handleChange('emailSubject', e.target.value)}/>
+                    </div>
+                  </div>
+                </div>
+                <div className="section">
+                <div className="fieldset flex mb-0">
+                    <label className="muted">Message</label>
+                    <div className="field-val width-lg">
+                      <textarea className="input-ctrl font-md text-black height-md" value={emailMessage} onChange={e => this.handleChange('emailMessage', e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn" onClick={() => { reassignedSdm && this.reassignQueries(map(this.getSelectedQueries(), 'id'), reassignedSdm.id) }}>Send</a>
+                  <a className="btn btn-clear" onClick={() => { reassignedSdm && this.reassignQueries(map(this.getSelectedQueries(), 'id'), reassignedSdm.id) }}>Save Draft</a>
+                </div>
+                <div className="rt">
+                  <a className="btn btn-clear mr-0" onClick={() => this.closeModal('isSendEmailModal')}>Cancel</a>
                 </div>
               </footer>
             </div>

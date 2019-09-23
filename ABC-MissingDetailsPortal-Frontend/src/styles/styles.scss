@@ -443,6 +443,10 @@ select {
         height: 40px;
         line-height: 40px;
         margin-right: 10px;
+
+        &.mr-0 {
+          margin-right: 0;
+        }
       }
 
       &.flex {
@@ -622,6 +626,17 @@ select {
         padding-bottom: 1px;
       }
 
+      &.pad-t-sm {
+        padding-top: 23px;
+      }
+
+      .section {
+        background-color: $white-two;
+        border-radius: 3px;        
+        padding: 18px 16px;
+        margin-bottom: 8px;
+      }
+
       // fieldset
       .fieldset {
         &.flex {
@@ -630,15 +645,31 @@ select {
           margin-bottom: 10px;
         }
 
+        &.mb-lg {
+          margin-bottom: 16px;
+        }
+
+        &.mb-0 {
+          margin-bottom: 0;
+        }
+
         label {
           font-size: 14px;
           line-height: 30px;
           text-align: left;
           color: $black;
+
+          &.muted {
+            color: $steel-grey;
+          }
         }
 
         .field-val {
           flex: 0 58%;
+
+          &.width-lg {
+            flex: 0 90%;
+          }
 
           select {
             height: 30px;
@@ -648,6 +679,21 @@ select {
           .input-ctrl {
             height: 30px;
             line-height: 22px;
+
+            &.font-md {
+              font-size: 14px;
+              line-height: 18px;
+            }
+
+            &.text-black {
+              color: $black;
+            }
+          }
+
+          textarea.input-ctrl {
+            &.height-md {
+              height: 266px;
+            }
           }
         }
       }
