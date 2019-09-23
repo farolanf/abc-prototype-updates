@@ -126,6 +126,14 @@
     }
   }
 
+  .table-section {
+    .query-col {
+      .radio-ctrl {
+        visibility: visible;
+      } 
+    }
+  }
+
   // list-seleced-opts
   .list-seleced-opts {
     display: flex;

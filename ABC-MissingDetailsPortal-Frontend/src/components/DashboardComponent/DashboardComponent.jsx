@@ -5,6 +5,7 @@ import { get, assign, cloneDeep, remove, isFunction, isEmpty, trim} from 'lodash
 import QueryTable from '../../components/QueryTable';
 import FilterQueryTable from '../../components/FilterQueryTable';
 import * as roles from '../../constants/roleTypes';
+import permissions from '../../constants/permissions';
 import * as statuses from '../../constants/queryStatusTypes';
 import utils from '../../utils';
 import './DashboardComponent.scss';
@@ -218,6 +219,7 @@ class DashboardComponent extends Component {
     const { user, meta, lookup, queries, users, loadUsers, watchQuery,
       reassignQueries, updateWatchers, createComment, getQuery, changeRequestor, downloadAttachment} = this.props;
     const { modal, currentTab, watchListOnly, myOnly, queriesSelected } = this.state;
+    const role = get(this.props, 'user.role')
 
     return (
       <div className="subpage">
@@ -273,7 +275,7 @@ class DashboardComponent extends Component {
                     </span>
                   </li>
                   {
-                    get(this.props, 'user.role') === roles.DELIVERY_USER &&
+                    get(permissions, [role, 'queries', 'canRespond']) &&
                     (
                       <li>
                         <a className="btn" onClick={() => this.showModal('isRespondModal')}>
@@ -283,8 +285,7 @@ class DashboardComponent extends Component {
                     )
                   }
                   {
-                    get(this.props, 'user.role') === roles.DELIVERY_USER &&
-                    (
+                    get(permissions, [role, 'queries', 'canReject']) && (
                       <li>
                         <a className="btn" onClick={() => this.showModal('isRejectModal')}>
                           <span className="ico-reject">Reject</span>
@@ -292,11 +293,33 @@ class DashboardComponent extends Component {
                       </li>
                     )
                   }
-                  <li>
-                    <a className="btn" onClick={() => this.showModal('isReassignModal')}>
-                      <span className="ico-reassign">Re-assign</span>
-                    </a>
-                  </li>
+                  {
+                    get(permissions, [role, 'queries', 'canReassign']) && (
+                      <li>
+                        <a className="btn" onClick={() => this.showModal('isReassignModal')}>
+                          <span className="ico-reassign">Re-assign</span>
+                        </a>
+                      </li>
+                    )
+                  }
+                  {
+                    get(permissions, [role, 'queries', 'canSendEmail']) && (
+                      <li>
+                        <a className="btn" onClick={() => this.showModal('isSendEmailModal')}>
+                          <span className="ico-send-email">Send Email</span>
+                        </a>
+                      </li>
+                    )
+                  }
+                  {
+                    get(permissions, [role, 'queries', 'canEscalate']) && (
+                      <li>
+                        <a className="btn" onClick={() => this.showModal('isEscalateModal')}>
+                          <span className="ico-escalate">Escalate</span>
+                        </a>
+                      </li>
+                    )
+                  }
                 </ul>
               )
               : (
