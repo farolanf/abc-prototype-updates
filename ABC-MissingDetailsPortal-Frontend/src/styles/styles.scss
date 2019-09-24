@@ -943,9 +943,10 @@ select {
 
       & > .rt {
         width: 630px;
-        height: 565px;
+        height: fit-content;
         padding: 23px 24px 24px 24px;
         margin-bottom: 30px;
+        border: 1px solid $cool-grey;
 
         .preview-title {
           font-size: 18px;
@@ -953,7 +954,33 @@ select {
         }
 
         .table-container {
-          height: 100%;
+          height: fit-content;
+
+          .tr {
+            border-top: 1px solid $silver;
+          }
+
+          .th, .td {
+            border-left: 1px solid $silver;
+
+            &:last-child {
+              border-right: 1px solid $silver;
+            }
+          }
+
+          .thead {
+            background-color: transparent;
+          }
+
+          .tbody {
+            .tr {
+              background-color: transparent;
+
+              &:last-child {
+                border-bottom: 1px solid $silver;
+              }
+            }
+          }
         }
       }
 
