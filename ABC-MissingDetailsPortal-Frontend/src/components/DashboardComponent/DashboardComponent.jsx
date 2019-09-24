@@ -187,7 +187,7 @@ class DashboardComponent extends Component {
     }, () => this.loadData(1))
   }
 
-  exportQueries(){
+  exportQueries({ exportLogHistory }){
     const {currentTab, watchListOnly, filters, myOnly} = this.state;
     if(isEmpty(this.props.queries[currentTab].results)){
       return;

@@ -946,8 +946,37 @@ select {
         height: fit-content;
         padding: 23px 24px 24px 24px;
         margin-bottom: 30px;
+        margin-left: 30px;
         border: 1px solid $cool-grey;
 
+        &.hidden {
+          display: none;
+        }
+
+        .list.sheet-tabs {
+          display: flex;
+          margin-bottom: 22px;
+    
+          li {
+            font-size: 14px;
+            line-height: 28px;
+            text-align: left;
+            color: $steel-grey;
+            cursor: pointer;
+            padding-bottom: 0;
+            border-bottom: 3px solid transparent;
+            margin-left: 30px;
+    
+            &:first-child {
+              margin-left: 0;
+            }
+    
+            &.on {
+              border-bottom: 3px solid $peacock-blue;
+            }
+          }
+        }
+    
         .preview-title {
           font-size: 18px;
           margin-bottom: 17px;
@@ -1020,13 +1049,13 @@ select {
 
           .field-val {
             flex-grow: 1;
-            padding-right: 30px;
           }
         }
       }
     }
 
     .modal-footer {
+      margin-right: 0;
 
       &.mt-md {
         margin-top: 24px;

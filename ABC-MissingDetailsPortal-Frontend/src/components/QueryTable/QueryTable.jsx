@@ -85,7 +85,10 @@ class QueryTable extends Component {
       emailSubject: '',
       emailMessage: '',
       errors: {},
-      rejectReason: 'Incomplete details'
+      rejectReason: 'Incomplete details',
+      exportLogHistory: false,
+      exportShowPreview: false,
+      previewSheet: 'sheet1'
     }
   }
 
@@ -529,7 +532,7 @@ class QueryTable extends Component {
   render() {
     const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment, exportQueries } = this.props;
     const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
-      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage } = this.state;
+      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet } = this.state;
     const startIndex = (dataset.page - 1) * dataset.perPage + 1;
     const endIndex = min([dataset.page * dataset.perPage, dataset.total]);
 
@@ -1396,8 +1399,8 @@ class QueryTable extends Component {
                 <div className="lt">
                   <div className="field-group">
                     <label className='field-label'>Export Setting</label>
-                    <RadioCtrl params={{ label: "Include log history", isChecked: false }} onChange={(isChecked) => null} />
-                    <RadioCtrl params={{ label: "Show preview", isChecked: false }} onChange={(isChecked) => null} />
+                    <RadioCtrl params={{ label: "Include log history", isChecked: exportLogHistory }} onChange={val => this.setState({ exportLogHistory: val })} />
+                    <RadioCtrl params={{ label: "Show preview", isChecked: exportShowPreview }} onChange={val => this.setState({ exportShowPreview: val })} />
                   </div>
                   <div className="field-group mb-0">
                     <label className='field-label'>Specify file name and destination</label>
@@ -1410,14 +1413,18 @@ class QueryTable extends Component {
                   </div>
                   <footer className="modal-footer modal-actions mt-md flex">
                     <div className="lt">
-                      <a className="btn" onClick={exportQueries}>Export</a>
+                      <a className="btn" onClick={() => exportQueries({ exportLogHistory })}>Export</a>
                     </div>
                     <div className="rt">
                       <a className="btn btn-clear mr-0" onClick={() => this.closeModal('isExportExcelModal')}>Cancel</a>
                     </div>
                   </footer>
                 </div>
-                <div className="rt">
+                <div className={`rt ${!exportShowPreview ? 'hidden' : ''}`}>
+                  <ul className="list sheet-tabs">
+                    <li className={previewSheet === 'sheet1' ? 'on' : ''} onClick={() => this.setState({ previewSheet: 'sheet1' })}>Sheet 1</li>
+                    <li className={previewSheet === 'sheet2' ? 'on' : ''} onClick={() => this.setState({ previewSheet: 'sheet2' })}>Sheet 2</li>
+                  </ul>
                   <div className="preview-title">Missing Info Queries</div>
                   <div className="table-container">
                     <div className="table table-query table-mid">
