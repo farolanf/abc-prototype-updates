@@ -36,7 +36,7 @@ class Dashboard extends Component {
   }
 
   render() {
-    const {dashboardAction:{getQueries, watchQuery, unwatchQuery, reassignQueries, updateWatchers, getQuery, changeRequestor}, user, statistics, 
+    const {dashboardAction:{getQueries, watchQuery, unwatchQuery, reassignQueries, sendEmail, saveSendEmailDraft, updateWatchers, getQuery, changeRequestor}, user, statistics, 
       allQueries, newQueries, openQueries, closedQueries, rejectedQueries, lookup, users } = this.props;
 
     return (
@@ -60,6 +60,8 @@ class Dashboard extends Component {
             users={users.allUsers.results}
             loadUsers={this.loadUsers.bind(this)}
             reassignQueries={reassignQueries}
+            sendEmail={sendEmail}
+            saveSendEmailDraft={saveSendEmailDraft}
             updateWatchers={updateWatchers}
             createComment={this.createComment.bind(this)}
             getQuery={getQuery}

@@ -155,6 +155,16 @@ function reassignQueries(queryIds, userId){
   return patch('/reassignQueries', {queryIds, userId});
 }
 
+function sendEmail(queryIds, userId){
+  console.log('sendEmail', queryIds, userId)
+  return Promise.resolve({ ok: true })
+}
+
+function saveSendEmailDraft(emailProps, userId) {
+  console.log('saveSendEmailDraft', emailProps, userId)
+  return Promise.resolve({ ok: true })
+}
+
 function updateWatchers(queryId, userIds){
   return patch(`/queries/${queryId}/watchers`, {userIds});
 }
@@ -275,6 +285,8 @@ export default {
   getQuery,
   exportQueries,
   reassignQueries,
+  sendEmail,
+  saveSendEmailDraft,
   updateWatchers,
   createComment,
   createQuery,

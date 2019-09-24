@@ -217,7 +217,7 @@ class DashboardComponent extends Component {
 
   render() {
     const { user, meta, lookup, queries, users, loadUsers, watchQuery,
-      reassignQueries, updateWatchers, createComment, getQuery, changeRequestor, downloadAttachment} = this.props;
+      reassignQueries, sendEmail, saveSendEmailDraft, updateWatchers, createComment, getQuery, changeRequestor, downloadAttachment} = this.props;
     const { modal, currentTab, watchListOnly, myOnly, queriesSelected } = this.state;
     const role = get(this.props, 'user.role')
 
@@ -386,6 +386,8 @@ class DashboardComponent extends Component {
               users={users}
               loadUsers={loadUsers}
               reassignQueries={reassignQueries}
+              sendEmail={sendEmail}
+              saveSendEmailDraft={saveSendEmailDraft}
               updateWatchers={updateWatchers}
               createComment={createComment}
               getQuery={getQuery}

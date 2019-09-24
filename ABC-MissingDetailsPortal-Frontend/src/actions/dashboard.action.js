@@ -115,6 +115,46 @@ export function reassignQueries(queryIds, userId){
   }
 }
 
+export function sendEmail(queryIds, userId){
+  return (dispatch)=>{
+    dispatch({type: types.LOADING_START});
+    return DataSvc.sendEmail(queryIds, userId).then(resp=>{
+      dispatch({type: types.LOADING_END});
+      if(resp.ok){
+        utils.showMessage(dispatch, 'Send Email Successfully');
+      }else{
+        resp.json().then(result=>{
+          utils.showMessage(dispatch, 'Send Email Failed: ' + result.message, true);
+        });
+      }
+      return resp;
+    }).catch(()=>{
+      dispatch({type: types.LOADING_END});
+      utils.showMessage(dispatch, 'Send Email Failed', true);
+    });
+  }
+}
+
+export function saveSendEmailDraft(emailProps, userId){
+  return (dispatch)=>{
+    dispatch({type: types.LOADING_START});
+    return DataSvc.saveSendEmailDraft(emailProps, userId).then(resp=>{
+      dispatch({type: types.LOADING_END});
+      if(resp.ok){
+        utils.showMessage(dispatch, 'Send Email Draft Saved Successfully');
+      }else{
+        resp.json().then(result=>{
+          utils.showMessage(dispatch, 'Send Email Draft Save Failed: ' + result.message, true);
+        });
+      }
+      return resp;
+    }).catch(()=>{
+      dispatch({type: types.LOADING_END});
+      utils.showMessage(dispatch, 'Send Email Draft Save Failed', true);
+    });
+  }
+}
+
 export function updateWatchers(queryId, userIds){
   return (dispatch)=>{
     dispatch({type: types.LOADING_START});
