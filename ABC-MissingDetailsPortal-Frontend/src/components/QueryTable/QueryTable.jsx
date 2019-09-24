@@ -527,7 +527,7 @@ class QueryTable extends Component {
   }
 
   render() {
-    const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment } = this.props;
+    const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment, exportQueries } = this.props;
     const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
       reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage } = this.state;
     const startIndex = (dataset.page - 1) * dataset.perPage + 1;
@@ -1375,9 +1375,177 @@ class QueryTable extends Component {
                   <a className="btn btn-clear" onClick={() => { this.props.saveEscalationEmailDraft({ emailTo, emailSubject, emailMessage }, user.id) }}>Save Draft</a>
                 </div>
                 <div className="rt">
-                  <a className="btn btn-clear mr-0" onClick={() => this.closeModal('isSendEmailModal')}>Cancel</a>
+                  <a className="btn btn-clear mr-0" onClick={() => this.closeModal('isEscalateModal')}>Cancel</a>
                 </div>
               </footer>
+            </div>
+            {/* /.modal-send-email */}
+          </div>
+        }
+
+        {
+          modal && modal.isExportExcelModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-export-excel">
+              <header>
+                <h2 className="modal-title">Export to Excel</h2>
+                <a className="close-modal" onClick={() => this.closeModal('isExportExcelModal')}> </a>
+              </header>
+
+              <div className="modal-content pad-t-sm">
+                <div className="lt">
+                  <div className="field-group">
+                    <label className='field-label'>Export Setting</label>
+                    <RadioCtrl params={{ label: "Include log history", isChecked: false }} onChange={(isChecked) => null} />
+                    <RadioCtrl params={{ label: "Show preview", isChecked: false }} onChange={(isChecked) => null} />
+                  </div>
+                  <div className="field-group mb-0">
+                    <label className='field-label'>Specify file name and destination</label>
+                    <div className="fieldset flex browse">
+                      <label className="muted">Export to</label>
+                      <div className="field-val">
+                        <input type="file" className="input-ctrl font-md text-black" onChange={e => null} />
+                      </div>
+                    </div>
+                  </div>
+                  <footer className="modal-footer modal-actions mt-md flex">
+                    <div className="lt">
+                      <a className="btn" onClick={exportQueries}>Export</a>
+                    </div>
+                    <div className="rt">
+                      <a className="btn btn-clear mr-0" onClick={() => this.closeModal('isExportExcelModal')}>Cancel</a>
+                    </div>
+                  </footer>
+                </div>
+                <div className="rt">
+                  <div className="preview-title">Missing Info Queries</div>
+                  <div className="table-container">
+                    <div className="table table-query table-mid">
+                      <div className="table-mid-con">
+                        <div className="thead">
+                          <div className="tr">
+                            {
+                              columnsFinal.map((item, i) => (
+                                !item.isDetails && 
+                                <div key={i} className="th">
+                                  <span className="thlbl">{item.label}</span>
+                                </div>
+                              ))
+                            }
+                          </div>
+                        </div>
+                        <div className="tbody">
+                          {
+                            dataset.results.map((record, i) => (
+                              <div key={i} className={"tr expandable " + record.status + " " + (this.isExpandedRow(record.id) ? 'expanded' : '')}>
+                                <div className="norm tr-inner">
+                                  {
+                                    columnsFinal.map((item, i) => {
+                                      return !item.isDetails && (
+                                        <div key={i} className={"td " + (item.isDisabled ? 'disabled' : '')}>
+                                          {
+                                            item.type === 'array' && record[item.id] && record[item.id].map((arrayEl, j) => {
+                                              return j === 0 && <span key={j}>
+                                                <a>{item.id === 'watchers' ? (get(arrayEl, 'firstName', '') + ' ' + get(arrayEl, 'lastName', '')) : arrayEl.name} {record[item.id].length > 1 ? `& ${record[item.id].length - 1} more` : ''} </a>&nbsp;
+                                                </span>
+                                            })
+                                          }
+                                          {
+                                            item.type === 'date' && record[item.id] && <span>{moment(record[item.id]).format(DATE_FORMAT)}</span>
+                                          }
+                                          {
+                                            item.type === 'datetime' && record[item.id] && <span>{moment(record[item.id]).format(DATETIME_FORMAT)}</span>
+                                          }
+                                          {
+                                            !item.type && item.format === 'link' && <a>{record[item.id]}</a>
+                                          }
+                                          {
+                                            !item.type && !item.format && <span>{record[item.id]}</span>
+                                          }
+                                        </div>
+                                      )
+                                    })
+
+                                  }
+                                </div>
+                                <div className="on-expand tr-inner">
+                                  <div className="tr-inner-details">
+                                    <div className={"group " + (this.isDetailsItemDisable('billingIndex') ? 'disable' : '')}>
+                                      <h4>Billing Index</h4>
+                                      <div className="val">{record.billingIndex}</div>
+                                    </div>
+
+                                    <div className={"group " + (this.isDetailsItemDisable('billingStartDate') ? 'disable' : '')}>
+                                      <h4>Billing Start Date</h4>
+                                      <div className="val">{record.billingStartDate ? moment(record.billingStartDate).format(DATE_FORMAT) : 'N/A'}</div>
+                                    </div>
+
+                                    <div className={"group " + (this.isDetailsItemDisable('billingEndDate') ? 'disable' : '')}>
+                                      <h4>Billing End Date</h4>
+                                      <div className="val">{record.billingEndDate ? moment(record.billingEndDate).format(DATE_FORMAT) : 'N/A'}</div>
+                                    </div>
+
+                                    <div className={"group " + (this.isDetailsItemDisable('valueToBeBilled') ? 'disable' : '')}>
+                                      <h4>Value to be billed</h4>
+                                      <div className="val">{record.valueToBeBilled}</div>
+                                    </div>
+
+                                    <div className={"group " + (this.isDetailsItemDisable('currencyName') ? 'disable' : '')}>
+                                      <h4>Currency</h4>
+                                      <div className="val">{record.currencyName}</div>
+                                    </div>
+
+                                    <div className={"group " + (this.isDetailsItemDisable('closedDate') ? 'disable' : '')}>
+                                      <h4>Date & Time Closed</h4>
+                                      <div className="val">{record.closedDate ? moment(record.closedDate).format(DATETIME_FORMAT) : 'N/A'}</div>
+                                    </div>
+
+                                    <div className="group comment-group">
+                                      <h4>SDM Comments</h4>
+                                      <div className="val">{record.sdmComments.map(c => c.text).join('\n')}</div>
+                                    </div>
+
+                                    {
+                                      record.status === statuses.REJECTED &&
+                                      <div className="group comment-group">
+                                        <h4>Reject Reason</h4>
+                                        <div className="val">{record.sdmComments.map(c => c.rejectReason).join('\n')}</div>
+                                      </div>
+                                    }
+
+                                    <div className="group">
+                                      <h4>Attachments</h4>
+                                      <div className="val">{
+                                        record.attachments && record.attachments.map((attachment, idx) => {
+                                          return (
+                                            <div key={idx} className="attachments">
+                                              <div className={"file " + attachment.format}><a>{attachment.name}</a></div>
+                                            </div>
+                                          )
+                                        })
+                                      }</div>
+                                    </div>
+
+                                    <div className="group">
+                                      <h4>Rework Reason</h4>
+                                      <div className="val">{record.reworkReason}</div>
+                                    </div>
+
+                                    <div className="group">
+                                      <h4>Requestor</h4>
+                                      <div className="val"><a>{record.requestorName}</a></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             {/* /.modal-send-email */}
           </div>

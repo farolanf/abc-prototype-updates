@@ -926,6 +926,87 @@ select {
     }
   }
 
+  .modal-export-excel {
+    width: auto;
+    min-width: 546px;
+
+    .modal-content {
+      display: flex;
+
+      & > .lt {
+        width: 486px;
+
+        .modal-footer {
+          margin-left: 0;
+        }
+      }
+
+      & > .rt {
+        width: 630px;
+        height: 565px;
+        padding: 23px 24px 24px 24px;
+        margin-bottom: 30px;
+
+        .preview-title {
+          font-size: 18px;
+          margin-bottom: 17px;
+        }
+
+        .table-container {
+          height: 100%;
+        }
+      }
+
+      .field-label {
+        font-size: 14px;
+        font-weight: bold;
+        color: $brownish-grey;
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .field-group {
+        margin-bottom: 36px;
+
+        &.mb-0 {
+          margin-bottom: 0;
+        }
+      }
+
+      .radio-ctrl {
+        display: block;
+        margin-bottom: 10px;
+
+        .radio-label {
+          padding-left: 26px;
+        }
+      }
+
+      .fieldset {
+        label {
+          width: 78px;
+        }
+
+        &.browse {
+          justify-content: start;
+          margin-bottom: 0;
+
+          .field-val {
+            flex-grow: 1;
+            padding-right: 30px;
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+
+      &.mt-md {
+        margin-top: 24px;
+      }
+    }
+  }
+
   // query-header
   .query-header {
     justify-content: space-between;

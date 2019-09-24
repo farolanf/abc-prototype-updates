@@ -345,7 +345,7 @@ class DashboardComponent extends Component {
             <button className={`btn ${watchListOnly ? '' : 'btn-clear'} off-management_user`} onClick={this.toggleWatchList}>
               Watchlist
             </button>
-            <button className={`btn btn-clear ${isEmpty(queries[currentTab].results) ? 'btn-disabled' : ''}`} onClick={this.exportQueries}>
+            <button className={`btn btn-clear ${isEmpty(queries[currentTab].results) ? 'btn-disabled' : ''}`} onClick={() => this.showModal('isExportExcelModal')}>
               <span className="ico-excel" >Export to .xlsx</span>
             </button>
             <button className="btn btn-clear" onClick={() => this.showModal('isManageColModal')}>
@@ -395,6 +395,7 @@ class DashboardComponent extends Component {
               getQuery={getQuery}
               changeRequestor={changeRequestor}
               downloadAttachment={downloadAttachment}
+              exportQueries={this.exportQueries}
             />
           ))
         }

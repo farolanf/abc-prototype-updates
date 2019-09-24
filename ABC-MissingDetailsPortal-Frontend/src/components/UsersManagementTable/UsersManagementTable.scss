@@ -421,76 +421,97 @@ $expandedHeight : 170px;
   }
 
   .table-query {
+    .table-mid-con {
+      width: fit-content;
+    }
+    
     .tr {
       justify-content: flex-start;
 
       .th, .td {
         &:nth-child(1) {
           flex: 0 64px;
+          min-width: 64px;
         }
 
         &:nth-child(2) {
           flex: 0 80px;
+          min-width: 80px;
         }
 
         &:nth-child(3) {
           flex: 0 100px;
+          min-width: 100px;
         }
 
         &:nth-child(4) {
           flex: 0 90px;
+          min-width: 90px;
         }
 
         &:nth-child(5) {
           flex: 0 72px;
+          min-width: 72px;
         }
 
         &:nth-child(6) {
           flex: 0 86px;
+          min-width: 86px;
         }
 
         &:nth-child(7) {
           flex: 0 90px;
+          min-width: 90px;
         }
 
         &:nth-child(8) {
           flex: 0 84px;
+          min-width: 84px;
         }
 
         &:nth-child(9) {
           flex: 0 80px;
+          min-width: 80px;
         }
 
         &:nth-child(10) {
           flex: 0 90px;
+          min-width: 90px;
         }
 
         &:nth-child(11) {
           flex: 0 92px;
+          min-width: 92px;
         }
 
         &:nth-child(12) {
           flex: 0 80px;
+          min-width: 80px;
         }
 
         &:nth-child(13) {
           flex: 0 70px;
+          min-width: 70px;
         }
 
         &:nth-child(14) {
           flex: 0 80px;
+          min-width: 80px;
         }
 
         &:nth-child(15) {
           flex: 0 80px;
+          min-width: 80px;
         }
 
         &:nth-child(16) {
           flex: 0 100px;
+          min-width: 100px;
         }
 
         &:nth-child(17) {
           flex: 0 120px;
+          min-width: 120px;
         }
 
         &:last-child {
