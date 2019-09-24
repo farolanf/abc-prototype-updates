@@ -121,7 +121,7 @@ export function sendEmail(queryIds, userId){
     return DataSvc.sendEmail(queryIds, userId).then(resp=>{
       dispatch({type: types.LOADING_END});
       if(resp.ok){
-        utils.showMessage(dispatch, 'Send Email Successfully');
+        utils.showMessageBox(dispatch, 'Email Sent', 'Your email has been sent successfully!');
       }else{
         resp.json().then(result=>{
           utils.showMessage(dispatch, 'Send Email Failed: ' + result.message, true);
@@ -161,7 +161,7 @@ export function sendEscalationEmail(queryIds, userId){
     return DataSvc.sendEscalationEmail(queryIds, userId).then(resp=>{
       dispatch({type: types.LOADING_END});
       if(resp.ok){
-        utils.showMessage(dispatch, 'Send Escalation Email Successfully');
+        utils.showMessageBox(dispatch, 'Escalation Sent', 'Your escalation message has been sent successfully!');
       }else{
         resp.json().then(result=>{
           utils.showMessage(dispatch, 'Send Escalation Email Failed: ' + result.message, true);

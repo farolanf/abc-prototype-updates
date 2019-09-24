@@ -13,7 +13,7 @@ class DefaultTemplate extends Component {
   }
 
   render() {
-    const { appData: {loading, messages}} = this.props;
+    const { appData: {loading, messages}, appAction: { hideMessage }} = this.props;
 
     return (
       <div className="main-wrapper">
@@ -27,7 +27,28 @@ class DefaultTemplate extends Component {
         <div className="messages">
           {
             messages.map(msg=>(
-              <div key={msg.id} className={`message ${msg.error ? 'error' : ''}`}>{msg.text}</div>
+              msg.messageBox
+                ? (
+                  <div key={msg.id} className="modal-wrap">
+                    <div className="modal modal-message-box">
+                      <header>
+                        <h2 className="modal-title">{msg.title}</h2>
+                        <a className="close-modal" onClick={() => hideMessage(msg.id)}> </a>
+                      </header>
+        
+                      <div className="modal-content pad-t-lg pad-b ct">
+                        <div className={`ico-check-circle hero-icon`} />
+                        {msg.text}
+                      </div>
+        
+                      <footer className="modal-footer modal-actions mt-md ct">
+                        <a className="btn" onClick={() => hideMessage(msg.id)}>Ok</a>
+                      </footer>
+                    </div>
+                  </div>
+                ) : (
+                  <div key={msg.id} className={`message ${msg.error ? 'error' : ''}`}>{msg.text}</div>
+                )
             ))
           }
         </div>

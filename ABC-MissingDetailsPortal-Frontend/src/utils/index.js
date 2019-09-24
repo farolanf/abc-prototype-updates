@@ -55,6 +55,11 @@ function showMessage(dispatch, text, error){
   }, 3000);
 }
 
+function showMessageBox(dispatch, title, text, error){
+  const id = messageId++;
+  dispatch({type: types.SHOW_MESSAGE, data: {title, text, error, id, messageBox: true}});
+}
+
 function validateEmail(email) {
   var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@mps\.com$/;
   return re.test(String(email).toLowerCase());
@@ -65,5 +70,6 @@ export default {
   formatField,
   queryProcessor,
   showMessage,
+  showMessageBox,
   validateEmail
 }

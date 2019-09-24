@@ -27,3 +27,10 @@ export function getNotifications(){
       });
   }
 }
+
+export function hideMessage(id){
+  return {
+    type: types.HIDE_MESSAGE,
+    data: { id }
+  }
+}
