@@ -100,6 +100,12 @@ class QueryTable extends Component {
         emailSubject: `Priority Notification from ${fullName}`,
         emailMessage: `\nDear User,\n\nThe below items were reviewed by ${fullName} and were mapped as priority in Front End Portal. Below the message sent by ${fullName}\n\nQuery ${queryIds.join(';')}\n\nHello,\nPlease prioritize this items as it has a big amount impact.\n\nRegards`
       })
+    } else if (get(this.props, 'modal.isEscalateModal') && !get(prevProps, 'modal.isEscalateModal')) {
+      this.setState({
+        emailTo: 'Missing Info Owner; Missing Info Action Owner',
+        emailSubject: `Escalation Notification from ${fullName}`,
+        emailMessage: `\nDear User,\n\nThe below items were reviewed by ${fullName} and were mapped as priority in Front End Portal. Below the message sent by ${fullName}\n\nQuery ${queryIds.join(';')}\n\nHello,\nPlease prioritize this items as it has a big amount impact.\n\nRegards`
+      })
     }
   }
 
@@ -417,6 +423,16 @@ class QueryTable extends Component {
       if (resp.ok) {
         if (get(this.props, 'modal.isSendEmailModal')) {
           this.closeModal('isSendEmailModal')
+        }
+      }
+    })
+  }
+
+  sendEscalationEmail(queryIds, userId) {
+    this.props.sendEscalationEmail(queryIds, userId).then(resp => {
+      if (resp.ok) {
+        if (get(this.props, 'modal.isEscalateModal')) {
+          this.closeModal('isEscalateModal')
         }
       }
     })
@@ -1315,7 +1331,55 @@ class QueryTable extends Component {
                 </div>
               </footer>
             </div>
-            {/* /.modal-bulk-process */}
+            {/* /.modal-send-email */}
+          </div>
+        }
+
+        {
+          modal && modal.isEscalateModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-send-email">
+              <header>
+                <h2 className="modal-title">Escalation Email</h2>
+                <a className="close-modal" onClick={() => this.closeModal('isEscalateModal')}> </a>
+              </header>
+
+              <div className="modal-content pad-t-sm">
+                <div className="section">
+                  <div className="fieldset flex mb-lg">
+                    <label className="muted">To</label>
+                    <div className="field-val width-lg">
+                      <input className="input-ctrl font-md text-black" value={emailTo} onChange={e => this.handleChange('emailTo', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="fieldset flex mb-0">
+                    <label className="muted">Subject</label>
+                    <div className="field-val width-lg">
+                      <input className="input-ctrl font-md text-black" value={emailSubject} onChange={e => this.handleChange('emailSubject', e.target.value)}/>
+                    </div>
+                  </div>
+                </div>
+                <div className="section">
+                <div className="fieldset flex mb-0">
+                    <label className="muted">Message</label>
+                    <div className="field-val width-lg">
+                      <textarea className="input-ctrl font-md text-black height-md" value={emailMessage} onChange={e => this.handleChange('emailMessage', e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn" onClick={() => { this.sendEscalationEmail(map(this.getSelectedQueries(), 'id'), user.id) }}>Send</a>
+                  <a className="btn btn-clear" onClick={() => { this.props.saveEscalationEmailDraft({ emailTo, emailSubject, emailMessage }, user.id) }}>Save Draft</a>
+                </div>
+                <div className="rt">
+                  <a className="btn btn-clear mr-0" onClick={() => this.closeModal('isSendEmailModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-send-email */}
           </div>
         }
       </div>

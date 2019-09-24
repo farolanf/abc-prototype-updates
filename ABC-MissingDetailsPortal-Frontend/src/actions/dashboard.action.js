@@ -155,6 +155,46 @@ export function saveSendEmailDraft(emailProps, userId){
   }
 }
 
+export function sendEscalationEmail(queryIds, userId){
+  return (dispatch)=>{
+    dispatch({type: types.LOADING_START});
+    return DataSvc.sendEscalationEmail(queryIds, userId).then(resp=>{
+      dispatch({type: types.LOADING_END});
+      if(resp.ok){
+        utils.showMessage(dispatch, 'Send Escalation Email Successfully');
+      }else{
+        resp.json().then(result=>{
+          utils.showMessage(dispatch, 'Send Escalation Email Failed: ' + result.message, true);
+        });
+      }
+      return resp;
+    }).catch(()=>{
+      dispatch({type: types.LOADING_END});
+      utils.showMessage(dispatch, 'Send Escalation Email Failed', true);
+    });
+  }
+}
+
+export function saveEscalationEmailDraft(emailProps, userId){
+  return (dispatch)=>{
+    dispatch({type: types.LOADING_START});
+    return DataSvc.saveEscalationEmailDraft(emailProps, userId).then(resp=>{
+      dispatch({type: types.LOADING_END});
+      if(resp.ok){
+        utils.showMessage(dispatch, 'Escalation Email Draft Saved Successfully');
+      }else{
+        resp.json().then(result=>{
+          utils.showMessage(dispatch, 'Escalation Email Draft Save Failed: ' + result.message, true);
+        });
+      }
+      return resp;
+    }).catch(()=>{
+      dispatch({type: types.LOADING_END});
+      utils.showMessage(dispatch, 'Escalation Email Draft Save Failed', true);
+    });
+  }
+}
+
 export function updateWatchers(queryId, userIds){
   return (dispatch)=>{
     dispatch({type: types.LOADING_START});

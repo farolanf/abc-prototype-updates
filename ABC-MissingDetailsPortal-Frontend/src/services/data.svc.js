@@ -165,6 +165,16 @@ function saveSendEmailDraft(emailProps, userId) {
   return Promise.resolve({ ok: true })
 }
 
+function sendEscalationEmail(queryIds, userId){
+  console.log('sendEscalationEmail', queryIds, userId)
+  return Promise.resolve({ ok: true })
+}
+
+function saveEscalationEmailDraft(emailProps, userId) {
+  console.log('saveEscalationEmailDraft', emailProps, userId)
+  return Promise.resolve({ ok: true })
+}
+
 function updateWatchers(queryId, userIds){
   return patch(`/queries/${queryId}/watchers`, {userIds});
 }
@@ -287,6 +297,8 @@ export default {
   reassignQueries,
   sendEmail,
   saveSendEmailDraft,
+  sendEscalationEmail,
+  saveEscalationEmailDraft,
   updateWatchers,
   createComment,
   createQuery,
