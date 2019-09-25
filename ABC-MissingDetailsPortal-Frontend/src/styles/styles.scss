@@ -943,13 +943,18 @@ select {
 
       & > .rt {
         width: 630px;
-        height: fit-content;
+        height: 565px;
         padding: 23px 24px 24px 24px;
         margin-bottom: 30px;
         margin-left: 30px;
         border: 1px solid $cool-grey;
+        overflow: auto;
 
         &.hidden {
+          display: none;
+        }
+
+        .hidden {
           display: none;
         }
 
@@ -985,15 +990,21 @@ select {
         .table-container {
           height: fit-content;
 
-          .tr {
-            border-top: 1px solid $silver;
+          .table-query {
+            .table-mid-con {
+              min-width: unset;
+            }
           }
 
-          .th, .td {
-            border-left: 1px solid $silver;
+          .tr {
+            border-top: 1px solid $silver;
 
-            &:last-child {
-              border-right: 1px solid $silver;
+            .th, .td {
+              border-left: 1px solid $silver;
+  
+              &:last-child {
+                border-right: 1px solid $silver;
+              }
             }
           }
 
