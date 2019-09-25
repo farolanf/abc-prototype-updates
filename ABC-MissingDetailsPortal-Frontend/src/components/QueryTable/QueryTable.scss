@@ -510,6 +510,22 @@
 }
 
 .modal-wrap {
+  .modal-mass-edit {
+    .sdm-con {
+      .col-msg {
+        .fieldset-group {
+          .fieldset.sdm-comment {
+            flex: 1;
+
+            .val {
+              margin-top: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+
   .modal.modal-message {
     .modal-content {
       pre {

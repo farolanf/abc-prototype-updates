@@ -222,6 +222,26 @@ export function saveEscalationEmailDraft(emailProps, userId){
   }
 }
 
+export function massEdit(massEditProps, queryIds, userId){
+  return (dispatch)=>{
+    dispatch({type: types.LOADING_START});
+    return DataSvc.massEdit(massEditProps, queryIds, userId).then(resp=>{
+      dispatch({type: types.LOADING_END});
+      if(resp.ok){
+        utils.showMessage(dispatch, 'Queries Updated Successfully');
+      }else{
+        resp.json().then(result=>{
+          utils.showMessage(dispatch, 'Queries Update Failed: ' + result.message, true);
+        });
+      }
+      return resp;
+    }).catch(()=>{
+      dispatch({type: types.LOADING_END});
+      utils.showMessage(dispatch, 'Queries Update Failed', true);
+    });
+  }
+}
+
 export function updateWatchers(queryId, userIds){
   return (dispatch)=>{
     dispatch({type: types.LOADING_START});

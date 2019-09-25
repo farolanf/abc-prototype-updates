@@ -175,6 +175,11 @@ function saveEscalationEmailDraft(emailProps, userId) {
   return Promise.resolve({ ok: true })
 }
 
+function massEdit(massEditProps, queryIds, userId) {
+  console.log('massEdit', massEditProps, queryIds, userId)
+  return Promise.resolve({ ok: true })
+}
+
 function updateWatchers(queryId, userIds){
   return patch(`/queries/${queryId}/watchers`, {userIds});
 }
@@ -299,6 +304,7 @@ export default {
   saveSendEmailDraft,
   sendEscalationEmail,
   saveEscalationEmailDraft,
+  massEdit,
   updateWatchers,
   createComment,
   createQuery,

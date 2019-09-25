@@ -217,7 +217,7 @@ class DashboardComponent extends Component {
 
   render() {
     const { user, meta, lookup, queries, users, loadUsers, watchQuery,
-      reassignQueries, sendEmail, saveSendEmailDraft, sendEscalationEmail, saveEscalationEmailDraft, updateWatchers, createComment, getQuery, changeRequestor, downloadAttachment} = this.props;
+      reassignQueries, sendEmail, saveSendEmailDraft, sendEscalationEmail, saveEscalationEmailDraft, massEdit, updateWatchers, createComment, getQuery, changeRequestor, downloadAttachment} = this.props;
     const { modal, currentTab, watchListOnly, myOnly, queriesSelected } = this.state;
     const role = get(this.props, 'user.role')
 
@@ -320,6 +320,15 @@ class DashboardComponent extends Component {
                       </li>
                     )
                   }
+                  {
+                    get(permissions, [role, 'queries', 'canMassEdit']) && (
+                      <li>
+                        <a className="btn" onClick={() => this.showModal('isMassEditModal')}>
+                          <span className="ico-pencil">Mass Edit</span>
+                        </a>
+                      </li>
+                    )
+                  }
                 </ul>
               )
               : (
@@ -390,6 +399,7 @@ class DashboardComponent extends Component {
               saveSendEmailDraft={saveSendEmailDraft}
               sendEscalationEmail={sendEscalationEmail}
               saveEscalationEmailDraft={saveEscalationEmailDraft}
+              massEdit={massEdit}
               updateWatchers={updateWatchers}
               createComment={createComment}
               getQuery={getQuery}

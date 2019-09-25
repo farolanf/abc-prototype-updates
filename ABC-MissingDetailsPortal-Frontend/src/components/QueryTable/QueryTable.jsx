@@ -102,6 +102,7 @@ class QueryTable extends Component {
       emailMessage: '',
       errors: {},
       rejectReason: 'Incomplete details',
+      missingInfoActionOwner: '',
       exportLogHistory: false,
       exportShowPreview: false,
       previewSheet: 'sheet1',
@@ -460,6 +461,16 @@ class QueryTable extends Component {
     })
   }
 
+  massEdit(massEditProps, queryIds, userId) {
+    this.props.massEdit(massEditProps, queryIds, userId).then(resp => {
+      if (resp.ok) {
+        if (get(this.props, 'modal.isMassEditModal')) {
+          this.closeModal('isMassEditModal')
+        }
+      }
+    })
+  }
+
   addWatcher(query, user) {
     this.props.updateWatchers(query.id, map(query.watchers, 'id').concat([user.id])).then(resp => {
       if (resp.ok) {
@@ -558,7 +569,7 @@ class QueryTable extends Component {
   render() {
     const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment, exportQueries } = this.props;
     const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
-      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet, showMessage, messageTitle, message } = this.state;
+      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, missingInfoActionOwner, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet, showMessage, messageTitle, message } = this.state;
     const startIndex = (dataset.page - 1) * dataset.perPage + 1;
     const endIndex = min([dataset.page * dataset.perPage, dataset.total]);
 
@@ -1422,6 +1433,80 @@ class QueryTable extends Component {
               </footer>
             </div>
             {/* /.modal-send-email */}
+          </div>
+        }
+
+        {
+          modal && modal.isMassEditModal &&
+          <div className="modal-wrap">
+            <div className="modal modal-bulk-process modal-mass-edit">
+              <header>
+                <h2 className="modal-title">Mass Edit</h2>
+                <a className="close-modal" onClick={() => this.closeModal('isMassEditModal')}> </a>
+              </header>
+
+              <div className="modal-content">
+                <ul className="multiple-query-list">
+                  {
+                    this.getSelectedQueries().map((query, i) => {
+                      return (
+                        <li key={i} className={queryExpanded && queryExpanded.id === query.id ? 'open' : ''}>
+                          <div className="li-con">
+                            <span className="qid">Query Id {query.id}</span>
+                            <div className="qopts">
+                              {
+                                this.getSelectedQueries().length > 1
+                                && <a className="del" onClick={() => selectQuery(false, query)} > </a>
+                              }
+                              <a className="toggle-handle" onClick={() => this.toggleQueryRow(query)}> </a>
+                            </div>
+                          </div>
+                          {queryExpanded && <QueryDetails query={queryExpanded}></QueryDetails>}
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+
+                <div className="sdm-con">
+                  <div className="col-msg alt">
+                    <h4>SDM</h4>
+
+                    <div className="fieldset-group">
+                      <div className="fieldset sdm-comment">
+                        <label>Comment</label>
+                        <div className="val">
+                          <textarea className={`input-ctrl ${errors.commentInput ? 'error' : ''}`} value={commentInput} onChange={e => this.handleChange('commentInput', e.target.value)}></textarea>
+                        </div>
+                      </div>
+                    </div>
+                    {/* /.fieldset-group */}
+                  </div>
+                </div>
+                {/* /.sdm-con */}
+
+                <div className="mia-owner">
+                  <label>Missing Info Action Owner</label>
+                  <div className="select-ctrl-wrap">
+                    <select className="select-ctrl" value={missingInfoActionOwner} onChange={e => this.handleChange('missingInfoActionOwner', e.target.value)}>
+                      {
+                        this.getSelectedQueries().map((q, i) => {
+                          return <option key={i} value={q.teamName}>{q.teamName}</option>
+                        })
+                      }
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <footer className="modal-footer modal-actions mt-md flex">
+                <div className="lt">
+                  <a className="btn" onClick={() => { this.massEdit({ sdmComment: commentInput, missingInfoActionOwner }, map(this.getSelectedQueries(), 'id'), user.id) }}>Save</a>
+                  <a className="btn btn-clear" onClick={() => this.closeModal('isMassEditModal')}>Cancel</a>
+                </div>
+              </footer>
+            </div>
+            {/* /.modal-mass-edit */}
           </div>
         }
 
