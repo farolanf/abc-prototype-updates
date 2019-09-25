@@ -155,8 +155,8 @@ function reassignQueries(queryIds, userId){
   return patch('/reassignQueries', {queryIds, userId});
 }
 
-function sendEmail(queryIds, userId){
-  console.log('sendEmail', queryIds, userId)
+function sendEmail(emailProps, queryIds, userId){
+  console.log('sendEmail', emailProps, queryIds, userId)
   return Promise.resolve({ ok: true })
 }
 
@@ -165,8 +165,8 @@ function saveSendEmailDraft(emailProps, userId) {
   return Promise.resolve({ ok: true })
 }
 
-function sendEscalationEmail(queryIds, userId){
-  console.log('sendEscalationEmail', queryIds, userId)
+function sendEscalationEmail(emailProps, queryIds, userId){
+  console.log('sendEscalationEmail', emailProps, queryIds, userId)
   return Promise.resolve({ ok: true })
 }
 

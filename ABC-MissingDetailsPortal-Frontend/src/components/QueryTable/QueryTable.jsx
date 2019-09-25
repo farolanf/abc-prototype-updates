@@ -104,7 +104,10 @@ class QueryTable extends Component {
       rejectReason: 'Incomplete details',
       exportLogHistory: false,
       exportShowPreview: false,
-      previewSheet: 'sheet1'
+      previewSheet: 'sheet1',
+      showMessage: false,
+      messageTitle: '',
+      message: ''
     }
   }
 
@@ -555,9 +558,11 @@ class QueryTable extends Component {
   render() {
     const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment, exportQueries } = this.props;
     const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
-      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet } = this.state;
+      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet, showMessage, messageTitle, message } = this.state;
     const startIndex = (dataset.page - 1) * dataset.perPage + 1;
     const endIndex = min([dataset.page * dataset.perPage, dataset.total]);
+
+    const showEscalationField = !!dataset.results.find(q => !!q.escalation)
 
     return (
       <div className={`table-section ${className}`}>
@@ -606,7 +611,7 @@ class QueryTable extends Component {
                 <div className="tr">
                   {
                     columnsFinal.map((item, i) => {
-                      return !item.isDetails && i > 0 && (
+                      return !item.isDetails && i > 0 && (item.id !== 'escalation' || (item.id === 'escalation' && showEscalationField)) && (
                         <div key={i} className={"th " + (item.isDisabled ? 'disabled' : '')}>
                           <span className={"thlbl " + this.state.sortOrder + ' ' + (this.state.sortBy === item.id ? ' sortable' : ' ')} onClick={() => this.sortTable(item.id)}>{item.label}</span>
                         </div>
@@ -622,7 +627,8 @@ class QueryTable extends Component {
                       <div className="norm tr-inner">
                         {
                           columnsFinal.map((item, i) => {
-                            return !item.isDetails && i > 0 && (
+                            return !item.isDetails && i > 0 && (item.id !== 'escalation' || (item.id === 'escalation' && showEscalationField)) &&
+                            (
                               <div key={i} className={"td " + (item.isDisabled ? 'disabled' : '')}>
                                 {
                                   item.type === 'array' && record[item.id] && record[item.id].map((arrayEl, j) => {
@@ -639,6 +645,16 @@ class QueryTable extends Component {
                                 }
                                 {
                                   !item.type && item.format === 'link' && <a>{record[item.id]}</a>
+                                }
+                                {
+                                  item.type === 'escalation' &&
+                                  !!record[item.id] &&
+                                  <a onClick={() => this.setState({
+                                    showMessage: true,
+                                    messageTitle: 'Escalation Message',
+                                    message: record[item.id]
+                                  })} className={`dark-link ${
+                                    /** FIXME: simulate seen status **/record.id == 98 ? 'seen' : ''}`}><span className="blue-dot" />Escalation Message</a>
                                 }
                                 {
                                   !item.type && !item.format && <span>{record[item.id]}</span>
@@ -1349,7 +1365,7 @@ class QueryTable extends Component {
 
               <footer className="modal-footer modal-actions mt-md flex">
                 <div className="lt">
-                  <a className="btn" onClick={() => { this.sendEmail(map(this.getSelectedQueries(), 'id'), user.id) }}>Send</a>
+                  <a className="btn" onClick={() => { this.sendEmail({ emailTo, emailSubject, emailMessage }, map(this.getSelectedQueries(), 'id'), user.id) }}>Send</a>
                   <a className="btn btn-clear" onClick={() => { this.props.saveSendEmailDraft({ emailTo, emailSubject, emailMessage }, user.id) }}>Save Draft</a>
                 </div>
                 <div className="rt">
@@ -1397,7 +1413,7 @@ class QueryTable extends Component {
 
               <footer className="modal-footer modal-actions mt-md flex">
                 <div className="lt">
-                  <a className="btn" onClick={() => { this.sendEscalationEmail(map(this.getSelectedQueries(), 'id'), user.id) }}>Send</a>
+                  <a className="btn" onClick={() => { this.sendEscalationEmail({ emailTo, emailSubject, emailMessage }, map(this.getSelectedQueries(), 'id'), user.id) }}>Send</a>
                   <a className="btn btn-clear" onClick={() => { this.props.saveEscalationEmailDraft({ emailTo, emailSubject, emailMessage }, user.id) }}>Save Draft</a>
                 </div>
                 <div className="rt">
@@ -1618,6 +1634,25 @@ class QueryTable extends Component {
               </div>
             </div>
             {/* /.modal-export-excel */}
+          </div>
+        }
+
+        {
+          showMessage &&
+          <div className="modal-wrap">
+            <div className="modal modal-message">
+              <header>
+                <h2 className="modal-title">{messageTitle}</h2>
+                <a className="close-modal" onClick={() => this.setState({ showMessage: false })}> </a>
+              </header>
+
+              <div className="modal-content pad-t-sm">
+                <pre>{message}</pre>
+              </div>
+              <footer className="modal-footer modal-actions mt-md ct">
+                <a className="btn" onClick={() => this.setState({ showMessage: false })}>Ok</a>
+              </footer>
+            </div>
           </div>
         }
       </div>

@@ -8,6 +8,11 @@ export const columns = [
     id: "status"
   },
   {
+    label: "Escalation",
+    id: "escalation",
+    type: "escalation"
+  },
+  {
     label: "Query Type",
     id: "queryType"
   },
@@ -122,6 +127,11 @@ export const fields = [
   {
     label: "Status",
     id: "status"
+  },
+  {
+    label: "Escalation",
+    id: "escalation",
+    type: "escalation"
   },
   {
     label: "Type",

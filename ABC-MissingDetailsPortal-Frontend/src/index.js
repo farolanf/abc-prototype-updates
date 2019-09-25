@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === `development`) {
   middlewares.push(createLogger());
 }
 
-const store = createStore(connectRouter(history)(allReducers), applyMiddleware(...middlewares));
+export const store = createStore(connectRouter(history)(allReducers), applyMiddleware(...middlewares));
 
 // Helper function that reders single route
 const renderRoute = (route, props) => {

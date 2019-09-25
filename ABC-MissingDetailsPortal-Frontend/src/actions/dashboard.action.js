@@ -115,10 +115,10 @@ export function reassignQueries(queryIds, userId){
   }
 }
 
-export function sendEmail(queryIds, userId){
+export function sendEmail(emailProps, queryIds, userId){
   return (dispatch)=>{
     dispatch({type: types.LOADING_START});
-    return DataSvc.sendEmail(queryIds, userId).then(resp=>{
+    return DataSvc.sendEmail(emailProps, queryIds, userId).then(resp=>{
       dispatch({type: types.LOADING_END});
       if(resp.ok){
         utils.showMessageBox(dispatch, 'Email Sent', 'Your email has been sent successfully!');
@@ -155,13 +155,25 @@ export function saveSendEmailDraft(emailProps, userId){
   }
 }
 
-export function sendEscalationEmail(queryIds, userId){
+export function sendEscalationEmail(emailProps, queryIds, userId){
   return (dispatch)=>{
     dispatch({type: types.LOADING_START});
-    return DataSvc.sendEscalationEmail(queryIds, userId).then(resp=>{
+    return DataSvc.sendEscalationEmail(emailProps, queryIds, userId).then(resp=>{
       dispatch({type: types.LOADING_END});
       if(resp.ok){
         utils.showMessageBox(dispatch, 'Escalation Sent', 'Your escalation message has been sent successfully!');
+
+        // FIXME: mock escalation results
+        const state = require('../index').store.getState()
+        const queries = state.dashboardReducer.allQueries.results.filter(q => queryIds.includes(q.id))
+        dispatch({
+          type: types.UPDATE_QUERIES_DONE,
+          data: queries.map(q => {
+            q.escalation = emailProps.emailMessage
+            return q
+          })
+        })
+
       }else{
         resp.json().then(result=>{
           utils.showMessage(dispatch, 'Send Escalation Email Failed: ' + result.message, true);

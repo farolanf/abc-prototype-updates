@@ -208,6 +208,29 @@
     color: $rich-electric-blue;
   }
 
+  .dark-link {
+    font-weight: bold;
+    color: $brownish-grey;
+
+    &.seen {
+      font-weight: unset;
+    }
+  }
+
+  .blue-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: $rich-electric-blue;
+    margin-right: 6px;
+  }
+
+  .seen {
+    .blue-dot {
+      display: none;
+    }
+  }
+
   .tr {
     .th {
       padding: 0 0 0 9px;
@@ -484,4 +507,14 @@
 
 .change-requestor.popup-window{
   left: -130px;
+}
+
+.modal-wrap {
+  .modal.modal-message {
+    .modal-content {
+      pre {
+        white-space: pre-wrap;
+      }
+    }
+  }
 }
