@@ -75,7 +75,7 @@ class MainHeader extends Component {
               <ul className="notification-list">
                 {
                   notifications.list.map((item, i) => (<li key={i}>
-                      <div className={"msg " + item.type}><div className="msg-text">{item.message}</div><span className="timestamp">{item.timestamp}</span> </div>
+                      <div className={"msg " + item.type}><div className="msg-text">{item.message}<br /><span className="query-id">Query ID <a>{item.queryId}</a></span></div><span className="timestamp">{item.timestamp}</span> </div>
                     </li>)
                   )
                 }

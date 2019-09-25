@@ -173,6 +173,21 @@ export function sendEscalationEmail(emailProps, queryIds, userId){
             return q
           })
         })
+        // FIXME: mock notifications
+        let id = 1
+        dispatch({
+          type: types.LOAD_NOTIFICATIONS_DONE,
+          data: {
+            total: queries.length,
+            list: queries.map(q=>({
+              id: id++,
+              type: 'New',
+              timestamp: '1m',
+              message: 'New Escalation message is received',
+              queryId: q.id
+            }))
+          }
+        })
 
       }else{
         resp.json().then(result=>{

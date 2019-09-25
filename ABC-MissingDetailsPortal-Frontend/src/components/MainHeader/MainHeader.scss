@@ -173,6 +173,10 @@
 
           .msg-text{
             flex: 1;
+
+            .query-id {
+              font-size: 14px;
+            }
           }
 
           .timestamp {
