@@ -51,6 +51,7 @@ class UsersManagement extends Component {
       email: '',
       role: roles.DELIVERY_USER,
       status: statuses.ACTIVE,
+      teamName: '',
       selectedUser: null,
       filters: {}
     }
@@ -177,10 +178,10 @@ class UsersManagement extends Component {
       errors
     });
 
-    const {email, status, role} = this.state;
+    const {email, status, role, teamName} = this.state;
     if(every(errors,v=>v===false)){
       this.props.createUser({
-        email: trim(email), status, role
+        email: trim(email), status, role, teamName
       }).then(resp=>{
         if(resp.ok){
           this.loadData();
@@ -220,7 +221,7 @@ class UsersManagement extends Component {
 
   render() {
     const { lookup, users, blockUser} = this.props;
-    const { currentTab, keyword, errors, email, role, status, roleToUpdate, selectedUser} = this.state;
+    const { currentTab, keyword, errors, email, role, status, teamName, roleToUpdate, selectedUser} = this.state;
 
     return (
       <div className="subpage user-management">
@@ -312,6 +313,19 @@ class UsersManagement extends Component {
                       <select onChange={this.onChange('status')} value={status}>
                         {
                           lookup.statusOpts && lookup.statusOpts.map((item, i) => {
+                            return (<option key={i} value={item.value}>{item.value}</option>)
+                          })
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="fieldset">
+                    <label>Team Name</label>
+                    <div className="field-val">
+                      <select onChange={this.onChange('teamName')} value={teamName}>
+                        {
+                          lookup.teamNameOpts && lookup.teamNameOpts.map((item, i) => {
                             return (<option key={i} value={item.value}>{item.value}</option>)
                           })
                         }

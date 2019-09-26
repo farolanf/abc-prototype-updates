@@ -105,6 +105,10 @@ const defaultState = {
     { id: 1, value: 'dMPS' },
     { id: 2, value: 'pMPS' },
   ],
+  teamNameOpts: [
+    { id: 1, value: 'Team 1' },
+    { id: 2, value: 'Team 2' },
+  ],
   exceptionTypes: []
 };
 
