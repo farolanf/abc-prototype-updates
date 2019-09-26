@@ -714,7 +714,7 @@ class QueryTable extends Component {
                                     messageTitle: 'Escalation Message',
                                     message: record[item.id]
                                   })} className={`dark-link ${
-                                    /** FIXME: simulate seen status **/record.id == 98 ? 'seen' : ''}`}><span className="blue-dot" />Escalation Message</a>
+                                    /** FIXME: simulate seen status **/Number(record.id) === 98 ? 'seen' : ''}`}><span className="blue-dot" />Escalation Message</a>
                                 }
                                 {
                                   !item.type && !item.format && <span>{record[item.id]}</span>

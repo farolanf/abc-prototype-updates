@@ -53,7 +53,7 @@ class MainHeader extends Component {
   }
 
   render() {
-    const { params: {notifications}, noSearch } = this.props;
+    const { params: {notifications} } = this.props;
 
     return (
       <header className="main-header">

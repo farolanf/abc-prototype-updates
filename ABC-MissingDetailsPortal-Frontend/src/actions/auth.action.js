@@ -1,7 +1,6 @@
 import { push } from 'connected-react-router';
 import * as types from '../constants/actionTypes';
 import dataSvc from '../services/data.svc';
-import * as roles from '../constants/roleTypes';
 import DataSvc from '../services/data.svc';
 import utils from '../utils';
 
