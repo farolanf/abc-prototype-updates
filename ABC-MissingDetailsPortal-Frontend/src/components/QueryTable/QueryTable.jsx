@@ -99,6 +99,8 @@ class QueryTable extends Component {
       selectedQuery: null,
       reassignSdmInput: '',
       commentInput: '',
+      caCommentInput: '',
+      updatedType: '',
       emailTo: '',
       emailSubject: '',
       emailMessage: '',
@@ -494,7 +496,15 @@ class QueryTable extends Component {
     })
   }
 
-  massEdit(massEditProps, queryIds, userId) {
+  massEdit(queryIds, userId) {
+    const { user } = this.props
+    const { commentInput, caCommentInput, missingInfoActionOwner, updatedType } = this.state
+    const massEditProps = { sdmComment: commentInput }
+    if (user.role === roles.DELIVERY_USER) {
+      Object.assign(massEditProps, { missingInfoActionOwner })
+    } else if (user.role === roles.CONTRACT_ADMIN_USER) {
+      Object.assign(massEditProps, { caComment: caCommentInput, queryType: updatedType })
+    }
     this.props.massEdit(massEditProps, queryIds, userId).then(resp => {
       if (resp.ok) {
         if (get(this.props, 'modal.isMassEditModal')) {
@@ -1652,26 +1662,59 @@ class QueryTable extends Component {
                     </div>
                     {/* /.fieldset-group */}
                   </div>
+
+                  {
+                    user.role === roles.CONTRACT_ADMIN_USER &&
+                    <div className="col-msg alt">
+                      <h4>CA</h4>
+
+                      <div className="fieldset-group">
+                        <div className="fieldset sdm-comment">
+                          <label>Comment</label>
+                          <div className="val">
+                            <textarea className={`input-ctrl ${errors.caCommentInput ? 'error' : ''}`} value={this.state.caCommentInput} onChange={e => this.handleChange('caCommentInput', e.target.value)}></textarea>
+                          </div>
+                        </div>
+                      </div>
+                      {/* /.fieldset-group */}
+                    </div>
+                  }
                 </div>
                 {/* /.sdm-con */}
 
-                <div className="mia-owner">
-                  <label>Missing Info Action Owner</label>
-                  <div className="select-ctrl-wrap">
-                    <select className="select-ctrl" value={missingInfoActionOwner} onChange={e => this.handleChange('missingInfoActionOwner', e.target.value)}>
-                      {
-                        this.getSelectedQueries().map((q, i) => {
-                          return <option key={i} value={q.teamName}>{q.teamName}</option>
-                        })
-                      }
-                    </select>
+                {
+                  user.role === roles.DELIVERY_USER &&
+                  <div className="mia-owner">
+                    <label>Missing Info Action Owner</label>
+                    <div className="select-ctrl-wrap">
+                      <select className="select-ctrl" value={missingInfoActionOwner} onChange={e => this.handleChange('missingInfoActionOwner', e.target.value)}>
+                        {
+                          this.getSelectedQueries().map((q, i) => {
+                            return <option key={i} value={q.teamName}>{q.teamName}</option>
+                          })
+                        }
+                      </select>
+                    </div>
                   </div>
-                </div>
+                }
+                {
+                  user.role === roles.CONTRACT_ADMIN_USER &&
+                  <div className="query-type">
+                    <label>Type</label>
+                    <div className="select-ctrl-wrap">
+                      <select className="select-ctrl" value={this.state.updatedType} onChange={e => this.handleChange('updatedType', e.target.value)}>
+                        {
+                          lookup.typeOpts.map((opt, i) => <option key={i} value={opt.value}>{opt.value}</option>)
+                        }
+                      </select>
+                    </div>
+                  </div>
+                }
               </div>
 
               <footer className="modal-footer modal-actions mt-md flex">
                 <div className="lt">
-                  <a className="btn" onClick={() => { this.massEdit({ sdmComment: commentInput, missingInfoActionOwner }, map(this.getSelectedQueries(), 'id'), user.id) }}>Save</a>
+                  <a className="btn" onClick={() => { this.massEdit(map(this.getSelectedQueries(), 'id'), user.id) }}>Save</a>
                   <a className="btn btn-clear" onClick={() => this.closeModal('isMassEditModal')}>Cancel</a>
                 </div>
               </footer>
