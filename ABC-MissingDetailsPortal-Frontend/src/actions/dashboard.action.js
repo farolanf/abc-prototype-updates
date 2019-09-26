@@ -313,3 +313,24 @@ export function changeRequestor(queryId, userId){
     });
   }
 }
+
+export function updateQuery(queryId, body, userId){
+  return (dispatch)=>{
+    dispatch({type: types.LOADING_START});
+    return DataSvc.patchQuery(queryId, body).then(resp=>{
+      dispatch({type: types.LOADING_END});
+      if(resp.ok){
+        resp.json().then(result => {
+          dispatch({type: types.LOAD_QUERY_DONE, data: result.results})
+        })
+        utils.showMessage(dispatch, 'Query Updated Successfully');
+      }else{
+        utils.showMessage(dispatch, 'Query Update Failed', true);
+      }
+      return resp;
+    }).catch(()=>{
+      dispatch({type: types.LOADING_END});
+      utils.showMessage(dispatch, 'Query Update Failed', true);
+    });
+  }
+}

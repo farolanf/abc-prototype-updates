@@ -61,6 +61,7 @@ class QueryTable extends Component {
     this.cancelColView = this.cancelColView.bind(this);
     this.showQueryDetails = this.showQueryDetails.bind(this);
     this.toggleQueryInfoView = this.toggleQueryInfoView.bind(this);
+    this.toggleLogHistoryView = this.toggleLogHistoryView.bind(this);
     this.isQuerySelected = this.isQuerySelected.bind(this);
     this.reassignSDM = this.reassignSDM.bind(this);
     this.showMore = this.showMore.bind(this);
@@ -108,7 +109,9 @@ class QueryTable extends Component {
       previewSheet: 'sheet1',
       showMessage: false,
       messageTitle: '',
-      message: ''
+      message: '',
+      isEditingQuery: false,
+      updatedFields: {}
     }
   }
 
@@ -191,6 +194,12 @@ class QueryTable extends Component {
   toggleQueryInfoView() {
     this.setState({
       isQueryInfoCollapsed: !this.state.isQueryInfoCollapsed
+    })
+  }
+
+  toggleLogHistoryView() {
+    this.setState({
+      isLogHistoryCollapsed: !this.state.isLogHistoryCollapsed
     })
   }
 
@@ -403,6 +412,7 @@ class QueryTable extends Component {
       });
     }
     this.setState({
+      isEditingQuery: false,
       queryExpanded: null,
       errors: {}
     });
@@ -426,6 +436,28 @@ class QueryTable extends Component {
     if (key === 'reassignSdmInput') {
       this.props.loadUsers(value, [roles.DELIVERY_USER]);
     }
+  }
+
+  handleChangeField(field, value) {
+    this.setState(prevState => ({
+      updatedFields: {
+        ...prevState.updatedFields,
+        [field]: value
+      }
+    }))
+  }
+
+  enterQueryEditing() {
+    this.setState({ isEditingQuery: true, updatedFields: {} })
+  }
+
+  exitQueryEditing(submit) {
+    const { user } = this.props
+    const { selectedQuery, updatedFields } = this.state
+    if (submit) {
+      this.props.updateQuery(selectedQuery.id, updatedFields, user.id);
+    }
+    this.setState({ isEditingQuery: false, updatedFields: {} })
   }
 
   reassignQueries(queryIds, userId) {
@@ -559,6 +591,14 @@ class QueryTable extends Component {
     return get(find(this.state.columnsFinal, ['id', id]), 'isDisabled', false);
   }
 
+  shouldRenderFieldValue(item, role, editing) {
+    return !this.shouldRenderFieldControl(item, role, editing);
+  }
+
+  shouldRenderFieldControl(item, role, editing) {
+    return editing && Array.isArray(item.editableBy) && item.editableBy.includes(role);
+  }
+
   handleChangeExportLogHistory(val){
     this.setState(prevState => ({
       exportLogHistory: val,
@@ -569,7 +609,7 @@ class QueryTable extends Component {
   render() {
     const { dataset, className, lookup, modal, user, selectQuery, users, loadUsers, downloadAttachment, exportQueries } = this.props;
     const { columnsFinal, columnsEdit, sortBy, sortOrder, page, perPage, selectedQuery, queryExpanded,
-      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, missingInfoActionOwner, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet, showMessage, messageTitle, message } = this.state;
+      reassignedSdm, reassignSdmInput, commentInput, errors, rejectReason, missingInfoActionOwner, emailTo, emailSubject, emailMessage, exportLogHistory, exportShowPreview, previewSheet, showMessage, messageTitle, message, isEditingQuery } = this.state;
     const startIndex = (dataset.page - 1) * dataset.perPage + 1;
     const endIndex = min([dataset.page * dataset.perPage, dataset.total]);
 
@@ -868,8 +908,28 @@ class QueryTable extends Component {
                       onClick={this.toggleQueryInfoView}
                     >Query Info <i></i></h3>
                     {
+                      isEditingQuery
+                      ?
+                      <div className="opts">
+                        <a className="btn w-md" onClick={() => this.exitQueryEditing(true)}>
+                          <span className="btn-lbl">Save</span>
+                        </a>
+                        <a className="btn btn-clear w-md" onClick={() => this.exitQueryEditing()}>
+                          <span className="btn-lbl">Cancel</span>
+                        </a>
+                      </div>
+                      :
                       this.isAssignable(selectedQuery) &&
                       <div className="opts">
+                        {
+                          this.isEditable(selectedQuery) &&
+                          <a className="btn btn-clear">
+                            <span className="btn-lbl ico-edit" onClick={() => this.enterQueryEditing()}>Edit</span>
+                          </a>
+                        }
+                        <a className="btn btn-clear">
+                          <span className="btn-lbl ico-export" onClick={() => null}>Export to .xls</span>
+                        </a>
                         <a className="btn btn-clear">
                           <span className="btn-lbl ico-re-assign" onClick={() => this.toggleReassignPopup(true)}>Re-assign</span>
                         </a>
@@ -911,58 +971,75 @@ class QueryTable extends Component {
                           return i >= fields.length / 2 && (
                             <li key={i}>
                               <span className="col">{item.label}</span>
-                              <div className={(item.id === 'watchers' || item.id === 'requestorName') ? 'watchers-wrap':''}>
+                              <div className={'val-con ' + (item.id === 'watchers' || item.id === 'requestorName') ? 'watchers-wrap':''}>
                                 {
-                                  item.type === 'array'
-                                    ? selectedQuery[item.id] && selectedQuery[item.id].map((arrayEl, j) => {
-                                      return <div key={j}><a>{item.id === 'watchers' ? (get(arrayEl, 'firstName', '') + ' ' + get(arrayEl, 'lastName', '')) : arrayEl.name}</a>&nbsp;</div>
-                                    })
+                                  this.shouldRenderFieldValue(item, user.role, isEditingQuery) &&
+                                  <React.Fragment>
+                                    {
+                                      item.type === 'array'
+                                        ? selectedQuery[item.id] && selectedQuery[item.id].map((arrayEl, j) => {
+                                          return <div key={j}><a>{item.id === 'watchers' ? (get(arrayEl, 'firstName', '') + ' ' + get(arrayEl, 'lastName', '')) : arrayEl.name}</a>&nbsp;</div>
+                                        })
 
-                                    : item.format === 'link'
-                                      ? <a>{selectedQuery[item.id]}</a>
-                                      : <span>{utils.formatField(selectedQuery, item)} </span>
-                                }
-                                {
-                                  item.id === 'sdmName' && get(selectedQuery, 'sdm.id', 0) === user.id &&
-                                  <span>&nbsp;(ME)</span>
-                                }
-                                {
-                                  item.id === 'watchers'
-                                  && <div className="add-watchers">
-                                    {user.role === roles.DELIVERY_USER && this.isEditable(selectedQuery) && <a onClick={() => this.toggleWatcher(true)}>+Add Watcher</a>}
-                                    {
-                                      this.state.isWatcherPopVisible &&
-                                      <UserSelector
-                                        className={this.state.isWatcherPopVisible ? 'open' : ''}
-                                        title="Add Watcher"
-                                        toggle={this.toggleWatcher}
-                                        users={users}
-                                        loadUsers={loadUsers}
-                                        roles="all"
-                                        buttonTitle="Add"
-                                        excludes={selectedQuery.watchers}
-                                        onChange={user => this.addWatcher(selectedQuery, user)}
-                                      />
+                                        : item.format === 'link'
+                                          ? <a>{selectedQuery[item.id]}</a>
+                                          : <span>{utils.formatField(selectedQuery, item)} </span>
                                     }
-                                  </div>
+                                    {
+                                      item.id === 'sdmName' && get(selectedQuery, 'sdm.id', 0) === user.id &&
+                                      <span>&nbsp;(ME)</span>
+                                    }
+                                    {
+                                      item.id === 'watchers'
+                                      && <div className="add-watchers">
+                                        {user.role === roles.DELIVERY_USER && this.isEditable(selectedQuery) && <a onClick={() => this.toggleWatcher(true)}>+Add Watcher</a>}
+                                        {
+                                          this.state.isWatcherPopVisible &&
+                                          <UserSelector
+                                            className={this.state.isWatcherPopVisible ? 'open' : ''}
+                                            title="Add Watcher"
+                                            toggle={this.toggleWatcher}
+                                            users={users}
+                                            loadUsers={loadUsers}
+                                            roles="all"
+                                            buttonTitle="Add"
+                                            excludes={selectedQuery.watchers}
+                                            onChange={user => this.addWatcher(selectedQuery, user)}
+                                          />
+                                        }
+                                      </div>
+                                    }
+                                    {
+                                      item.id === 'requestorName'
+                                      && <span className="add-watchers inline">
+                                        {user.role === roles.CONTRACT_ADMIN_USER && <a onClick={() => this.toggleRequestor(true)}>Change</a>}
+                                        {
+                                          this.state.isRequestorPopVisible &&
+                                          <UserSelector
+                                            className={'change-requestor ' + (this.state.isRequestorPopVisible ? 'open' : '')}
+                                            title="Change Requestor"
+                                            toggle={this.toggleRequestor}
+                                            users={users}
+                                            loadUsers={loadUsers}
+                                            roles={[roles.CONTRACT_ADMIN_USER]}
+                                            onChange={user => this.changeRequestor(selectedQuery, user)}
+                                          />
+                                        }
+                                      </span>
+                                    }
+                                  </React.Fragment>
                                 }
                                 {
-                                  item.id === 'requestorName'
-                                  && <span className="add-watchers inline">
-                                    {user.role === roles.CONTRACT_ADMIN_USER && <a onClick={() => this.toggleRequestor(true)}>Change</a>}
+                                  this.shouldRenderFieldControl(item, user.role, isEditingQuery) &&
+                                  <React.Fragment>
                                     {
-                                      this.state.isRequestorPopVisible &&
-                                      <UserSelector
-                                        className={'change-requestor ' + (this.state.isRequestorPopVisible ? 'open' : '')}
-                                        title="Change Requestor"
-                                        toggle={this.toggleRequestor}
-                                        users={users}
-                                        loadUsers={loadUsers}
-                                        roles={[roles.CONTRACT_ADMIN_USER]}
-                                        onChange={user => this.changeRequestor(selectedQuery, user)}
-                                      />
+                                      item.id === 'missingInfoActionOwner' &&
+                                      <select className="select-ctrl" value={this.state.updatedFields.missingInfoActionOwner} onChange={e => this.handleChangeField('missingInfoActionOwner', e.target.value)}>
+                                        <option val="delivery1@test.com">delivery1@test.com</option>
+                                        <option val="delivery2@test.com">delivery2@test.com</option>
+                                      </select>
                                     }
-                                  </span>
+                                  </React.Fragment>
                                 }
                               </div>
                             </li>
@@ -973,6 +1050,14 @@ class QueryTable extends Component {
                   </div>
                 </div>
                 {/* /.query-info */}
+
+                <div className="query-info">
+                  <header className="query-header">
+                    <h3 className={"query-info-h " + (this.state.isLogHistoryCollapsed ? 'alt' : '')}
+                      onClick={this.toggleLogHistoryView}
+                    >Log History <i></i></h3>
+                  </header>
+                </div>
 
                 <div className="section-header">
                   <h3>Workflow Message</h3>

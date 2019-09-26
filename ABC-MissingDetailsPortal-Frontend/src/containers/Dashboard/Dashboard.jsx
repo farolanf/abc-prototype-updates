@@ -36,7 +36,7 @@ class Dashboard extends Component {
   }
 
   render() {
-    const {dashboardAction:{getQueries, watchQuery, unwatchQuery, reassignQueries, sendEmail, saveSendEmailDraft, sendEscalationEmail, saveEscalationEmailDraft, massEdit, updateWatchers, getQuery, changeRequestor}, user, statistics, 
+    const {dashboardAction:{getQueries, watchQuery, unwatchQuery, reassignQueries, sendEmail, saveSendEmailDraft, sendEscalationEmail, saveEscalationEmailDraft, massEdit, updateWatchers, getQuery, changeRequestor, updateQuery}, user, statistics, 
       allQueries, newQueries, openQueries, closedQueries, rejectedQueries, lookup, users } = this.props;
 
     return (
@@ -69,6 +69,7 @@ class Dashboard extends Component {
             createComment={this.createComment.bind(this)}
             getQuery={getQuery}
             changeRequestor={changeRequestor}
+            updateQuery={updateQuery}
             downloadAttachment={DataSvc.downloadAttachment}
           />
         </DefaultTemplate>

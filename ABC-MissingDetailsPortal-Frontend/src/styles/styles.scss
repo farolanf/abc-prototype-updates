@@ -91,6 +91,10 @@ textarea.input-ctrl {
     line-height: 38px;
   }
 
+  &.w-md {
+    width: 110px;
+  }
+
   // btn-clear
   &.btn-clear {
     background-color: $white;
@@ -271,6 +275,18 @@ select {
 
           li:last-child {
             border-bottom: 1px solid $silver;
+          }
+
+          .val-con {
+            overflow: visible;
+          }
+
+          .select-ctrl {
+            width: 100%;
+            height: 30px;
+            margin: -6px 0;
+            background: $white url(../i/arrow-dn.svg) right 8px top 12px no-repeat;
+            background-size: 10px;
           }
         }
       }
@@ -1116,6 +1132,18 @@ select {
       }
       .btn {
         margin-left: 10px;
+
+        .ico-edit {
+          padding-left: 22px;
+          background: url("../i/pencil-blue.svg") 0 6px no-repeat;
+          background-size: 16px 16px;
+        }
+
+        .ico-export {
+          padding-left: 22px;
+          background: url("../i/ms_excel.svg") 0 6px no-repeat;
+          background-size: 16px 16px;
+        }
 
         .ico-re-assign {
           padding-left: 22px;

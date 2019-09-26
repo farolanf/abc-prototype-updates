@@ -1,3 +1,5 @@
+import * as roles from './roleTypes'
+
 export const columns = [
   {
     label: "Query ID",
@@ -129,16 +131,11 @@ export const fields = [
     id: "status"
   },
   {
-    label: "Escalation",
-    id: "escalation",
-    type: "escalation"
-  },
-  {
     label: "Type",
     id: "queryType"
   },
   {
-    label: "Sub-type",
+    label: "Sub Type",
     id: "querySubType"
   },
   {
@@ -148,6 +145,10 @@ export const fields = [
   {
     label: "Account",
     id: "accountName"
+  },
+  {
+    label: "Account Type",
+    id: "accountType"
   },
   {
     label: "AMP ID",
@@ -172,6 +173,10 @@ export const fields = [
     id: "valueToBeBilled"
   },
   {
+    label: "Passive Approval",
+    id: "passiveApproval"
+  },
+  {
     label: "Currency",
     id: "currencyName"
   },
@@ -191,9 +196,14 @@ export const fields = [
     type: 'datetime'
   },
   {
-    label: "SDM",
-    id: "sdmName",
-    format: "link"
+    label: "Date & Time Closed",
+    id: "closedDate",
+    type: 'datetime'
+  },
+  {
+    label: "Missing Info owner",
+    id: "missingInfoOwner",
+    format: 'link'
   },
   {
     label: "Rework",
@@ -211,6 +221,12 @@ export const fields = [
     label: "Requestor",
     id: "requestorName",
     format: "link"
+  },
+  {
+    label: "Missing Info Action Owner",
+    id: "missingInfoActionOwner",
+    format: 'link',
+    editableBy: [roles.DELIVERY_USER]
   },
   {
     label: "Watcher",
