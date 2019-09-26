@@ -416,6 +416,17 @@
       }
     }
   }
+
+  .table-mid.table-log-history {
+    .table-mid-con {
+      min-width: unset;
+      width: 100%;
+
+      .th, .td {
+        font-size: 14px;
+      }
+    }
+  }
 }
 
 // pagination-section

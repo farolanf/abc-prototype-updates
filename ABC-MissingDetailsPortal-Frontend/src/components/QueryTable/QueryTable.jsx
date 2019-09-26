@@ -114,7 +114,8 @@ class QueryTable extends Component {
       messageTitle: '',
       message: '',
       isEditingQuery: false,
-      updatedFields: {}
+      updatedFields: {},
+      isLogHistoryCollapsed: true
     }
   }
 
@@ -1152,6 +1153,39 @@ class QueryTable extends Component {
                       onClick={this.toggleLogHistoryView}
                     >Log History <i></i></h3>
                   </header>
+                  {
+                    !this.state.isLogHistoryCollapsed &&
+                    <div className="table-container">
+                      <div className="table table-mid table-log-history">
+                        <div className="table-mid-con">
+                          <div className="thead">
+                            <div className="tr">
+                              {
+                                logHistory.headers.map((item, i) => (
+                                  <div key={i} className="th">
+                                    <span className="thlbl">{item.label}</span>
+                                  </div>
+                                ))
+                              }
+                            </div>
+                          </div>
+                          <div className="tbody">
+                            {
+                              logHistory.data.map((row, i) => (
+                                <div key={i} className="tr">
+                                  <div className="td">{row.timestamp}</div>
+                                  <div className="td">{row.queryId}</div>
+                                  <div className="td">{row.action}</div>
+                                  <div className="td">{row.field}</div>
+                                  <div className="td"><a>{row.modifiedBy}</a></div>
+                                </div>
+                              ))  
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
                 </div>
 
                 <div className="section-header">
