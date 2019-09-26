@@ -23,6 +23,10 @@ const columns = [
     id: "status"
   },
   {
+    label: "Team Name",
+    id: "teamName"
+  },
+  {
     label: "Added 0n",
     id: "createdOn"
   }
