@@ -321,7 +321,7 @@ export function updateQuery(queryId, body, userId){
       dispatch({type: types.LOADING_END});
       if(resp.ok){
         resp.json().then(result => {
-          dispatch({type: types.LOAD_QUERY_DONE, data: result.results})
+          dispatch({type: types.LOAD_QUERY_DONE, data: result})
         })
         utils.showMessage(dispatch, 'Query Updated Successfully');
       }else{

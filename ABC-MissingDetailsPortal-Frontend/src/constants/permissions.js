@@ -15,7 +15,12 @@ export default {
       canRespond: true,
       canReject: true,
       canReassign: true,
-      canMassEdit: true,
+      canMassEdit: true
+    }
+  },
+  [roles.CONTRACT_ADMIN_USER]: {
+    queries: { 
+      canMassEdit: true
     }
   }
 }

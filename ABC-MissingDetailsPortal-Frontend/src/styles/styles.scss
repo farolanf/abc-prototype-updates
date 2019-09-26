@@ -273,6 +273,13 @@ select {
         .col-view {
           flex: 0 49%;
 
+          .col-item {
+            & > span + * {
+              overflow: visible;
+              flex: 1;
+            }
+          }
+
           li:last-child {
             border-bottom: 1px solid $silver;
           }
@@ -287,6 +294,26 @@ select {
             margin: -6px 0;
             background: $white url(../i/arrow-dn.svg) right 8px top 12px no-repeat;
             background-size: 10px;
+            flex: 1;
+          }
+
+          .input-ctrl {
+            height: 30px;
+            margin: -6px 0;
+            color: $brownish-grey;
+            flex: 1;
+          }
+
+          .radio-label {
+            padding-left: 24px;
+          }
+
+          .react-datepicker-wrapper {
+            width: 100%;
+
+            .react-datepicker__input-container {
+              width: 100%;
+            }
           }
         }
       }

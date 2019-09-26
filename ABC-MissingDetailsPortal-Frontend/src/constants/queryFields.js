@@ -128,105 +128,127 @@ export const fields = [
   },
   {
     label: "Status",
-    id: "status"
+    id: "status",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Type",
-    id: "queryType"
+    id: "queryType",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Sub Type",
-    id: "querySubType"
+    id: "querySubType",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Country",
-    id: "countryName"
+    id: "countryName",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Account",
-    id: "accountName"
+    id: "accountName",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Account Type",
-    id: "accountType"
+    id: "accountType",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "AMP ID",
-    id: "ampId"
+    id: "ampId",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Billing Index",
-    id: "billingIndex"
+    id: "billingIndex",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Billing Start Date",
     id: "billingStartDate",
-    type: 'date'
+    type: 'date',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Billing End Date",
     id: "billingEndDate",
-    type: 'date'
+    type: 'date',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Value to be billed",
-    id: "valueToBeBilled"
+    id: "valueToBeBilled",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Passive Approval",
-    id: "passiveApproval"
+    id: "passiveApproval",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Currency",
-    id: "currencyName"
+    id: "currencyName",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Due Date",
     id: "dueDate",
-    type: 'date'
+    type: 'date',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Revised Due Date",
     id: "reviseDate",
-    type: 'date'
+    type: 'date',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Date & Time Opened",
     id: "openedDate",
-    type: 'datetime'
+    type: 'datetime',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Date & Time Closed",
     id: "closedDate",
-    type: 'datetime'
+    type: 'datetime',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Missing Info owner",
     id: "missingInfoOwner",
-    format: 'link'
+    format: 'link',
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Rework",
-    id: "reworkStr"
+    id: "reworkStr",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Rework Reason",
-    id: "reworkReason"
+    id: "reworkReason",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "dMPS/pMPS",
-    id: "dmpsPmps"
+    id: "dmpsPmps",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Requestor",
     id: "requestorName",
-    format: "link"
+    format: "link",
+    editableBy: [roles.CONTRACT_ADMIN_USER]
   },
   {
     label: "Missing Info Action Owner",
     id: "missingInfoActionOwner",
     format: 'link',
-    editableBy: [roles.DELIVERY_USER]
+    editableBy: [roles.CONTRACT_ADMIN_USER, roles.DELIVERY_USER]
   },
   {
     label: "Watcher",

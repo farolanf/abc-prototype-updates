@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PT from 'prop-types';
 import { cloneDeep, min, get, map, findIndex, trim, omitBy, toArray, find } from 'lodash';
 import * as moment from 'moment';
+import DatePicker from 'react-datepicker';
 import Pagination from "react-js-pagination";
 import RadioCtrl from '../../components/RadioCtrl';
 import FileDragDrop from '../../components/FileDragDrop';
@@ -372,7 +373,7 @@ class QueryTable extends Component {
   }
 
   isEditable(query) {
-    return query.sdmId === this.props.user.id && (query.status === statuses.NEW || query.status === statuses.OPEN);
+    return (this.props.user.role === roles.CONTRACT_ADMIN_USER || query.sdmId === this.props.user.id) && (query.status === statuses.NEW || query.status === statuses.OPEN);
   }
 
   isAssignable(query) {
@@ -604,6 +605,14 @@ class QueryTable extends Component {
       exportLogHistory: val,
       previewSheet: !val ? 'sheet1' : prevState.previewSheet
     }))
+  }
+
+  renderFieldSelect(item, selectedQuery, options){
+    return (
+      <select className="select-ctrl" value={this.state.updatedFields[item.id] || selectedQuery[item.id]} onChange={e => this.handleChangeField(item.id, e.target.value)}>
+        {options.map((opt, i) => <option key={i} value={opt.value}>{opt.value}</option>)}
+      </select>
+    )
   }
 
   render() {
@@ -957,9 +966,47 @@ class QueryTable extends Component {
                       {
                         fields.map((item, i) => {
                           return i < fields.length / 2 && (
-                            <li key={i}>
+                            <li key={i} className="col-item">
                               <span className="col">{item.label}</span>
-                              <span className={"val-" + item.id + " " + selectedQuery[item.id]}>{utils.formatField(selectedQuery, item)}</span>
+                              {
+                                  this.shouldRenderFieldValue(item, user.role, isEditingQuery) &&
+                                  <span className={"val-" + item.id + " " + selectedQuery[item.id]}>{utils.formatField(selectedQuery, item)}</span>
+                              }
+                              {
+                                this.shouldRenderFieldControl(item, user.role, isEditingQuery) &&
+                                <React.Fragment>
+                                  {
+                                    ['accountName', 'ampId', 'billingIndex', 'valueToBeBilled'].includes(item.id) &&
+                                    <input type="text" className="input-ctrl" value={this.state.updatedFields[item.id] || selectedQuery[item.id]} onChange={e=> this.handleChangeField(item.id, e.target.value)} />
+                                  }
+                                  {
+                                    ['status', 'queryType', 'querySubType', 'countryName', 'accountType'].includes(item.id) &&
+                                    this.renderFieldSelect(item, selectedQuery, lookup[{
+                                      status: 'queryStatusOpts',
+                                      queryType: 'typeOpts',
+                                      querySubType: 'subTypeOpts',
+                                      countryName: 'countryOpts',
+                                      accountType: 'accountTypeOpts'
+                                    }[item.id]])
+                                  }
+                                  {
+                                    ['passiveApproval'].includes(item.id) &&
+                                    <label className="radio-ctrl">
+                                      <input type="checkbox" className="chk" checked={this.state.updatedFields[item.id] || selectedQuery[item.id]} onChange={e => this.handleChangeField(item.id, e.target.checked)} />
+                                      <span className="radio-label">Yes</span>
+                                    </label>
+                                  }
+                                  {
+                                    ['billingStartDate', 'billingEndDate'].includes(item.id) &&
+                                    <DatePicker
+                                      selected={moment(this.state.updatedFields[item.id] || selectedQuery[item.id])}
+                                      onChange={(dateVal) => this.handleChangeField(item.id, dateVal)}
+                                      className="input-ctrl datepicker md"
+                                      placeholderText="mm/dd/yyyy"
+                                    />
+                                  }
+                                </React.Fragment>
+                              }
                             </li>
                           )
                         })
@@ -1033,10 +1080,48 @@ class QueryTable extends Component {
                                   this.shouldRenderFieldControl(item, user.role, isEditingQuery) &&
                                   <React.Fragment>
                                     {
-                                      item.id === 'missingInfoActionOwner' &&
-                                      <select className="select-ctrl" value={this.state.updatedFields.missingInfoActionOwner} onChange={e => this.handleChangeField('missingInfoActionOwner', e.target.value)}>
-                                        <option val="delivery1@test.com">delivery1@test.com</option>
-                                        <option val="delivery2@test.com">delivery2@test.com</option>
+                                      ['reworkReason', 'requestorName'].includes(item.id) &&
+                                      <input type="text" className="input-ctrl" value={this.state.updatedFields[item.id] || selectedQuery[item.id]} onChange={e=> this.handleChangeField(item.id, e.target.value)} />
+                                    }
+                                    {
+                                      ['currencyName', 'dmpsPmps'].includes(item.id) &&
+                                      this.renderFieldSelect(item, selectedQuery, lookup[{
+                                        currencyName: 'currencyOpts',
+                                        dmpsPmps: 'dmpsOpts',
+                                      }[item.id]])
+                                    }
+                                    {
+                                      ['dueDate', 'reviseDate'].includes(item.id) &&
+                                      <DatePicker
+                                        selected={moment(this.state.updatedFields[item.id] || selectedQuery[item.id])}
+                                        onChange={(dateVal) => this.handleChangeField(item.id, dateVal)}
+                                        className="input-ctrl datepicker md"
+                                        placeholderText="mm/dd/yyyy"
+                                      />
+                                    }
+                                    {
+                                      ['openedDate', 'closedDate'].includes(item.id) &&
+                                      <React.Fragment>
+                                        <DatePicker
+                                          selected={moment(this.state.updatedFields[item.id] || selectedQuery[item.id])}
+                                          onChange={(dateVal) => this.handleChangeField(item.id, dateVal)}
+                                          className="input-ctrl datepicker md"
+                                          placeholderText="mm/dd/yyyy"
+                                        />
+                                      </React.Fragment>
+                                    }
+                                    {
+                                      item.id === 'reworkStr' &&
+                                      <label className="radio-ctrl">
+                                        <input type="checkbox" className="chk" checked={this.state.updatedFields.rework !== undefined ? this.state.updatedFields.rework : selectedQuery.rework} onChange={e => this.handleChangeField('rework', e.target.checked)} />
+                                        <span className="radio-label">Yes</span>
+                                      </label>
+                                    }
+                                    {
+                                      ['missingInfoOwner', 'missingInfoActionOwner'].includes(item.id) &&
+                                      <select className="select-ctrl" value={this.state.updatedFields[item.id]} onChange={e => this.handleChangeField(item.id, e.target.value)}>
+                                        <option value="delivery1@test.com">delivery1@test.com</option>
+                                        <option value="delivery2@test.com">delivery2@test.com</option>
                                       </select>
                                     }
                                   </React.Fragment>

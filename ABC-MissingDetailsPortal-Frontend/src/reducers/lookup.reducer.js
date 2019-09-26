@@ -1,6 +1,7 @@
 import * as types from '../constants/actionTypes';
 import * as roles from '../constants/roleTypes';
 import * as statuses from '../constants/statusTypes';
+import * as queryStatuses from '../constants/queryStatusTypes';
 import * as frequencies from '../constants/frequencyTypes';
 import * as units from '../constants/timeUnitTypes';
 
@@ -52,6 +53,24 @@ const defaultState = {
       value: statuses.BLOCKED
     }
   ],
+  queryStatusOpts: [
+    {
+      id: 1,
+      value: queryStatuses.NEW
+    },
+    {
+      id: 2,
+      value: queryStatuses.OPEN
+    },
+    {
+      id: 3,
+      value: queryStatuses.CLOSED
+    },
+    {
+      id: 4,
+      value: queryStatuses.REJECTED
+    }
+  ],
   emailFreqOpts: [
     {
       id: 1,
@@ -61,6 +80,30 @@ const defaultState = {
       id: 2,
       value: frequencies.ONCE_A_WEEK
     }
+  ],
+  typeOpts: [
+    { id: 1, value: 'IBR approval' },
+    { id: 2, value: 'Option 2' },
+  ],
+  subTypeOpts: [
+    { id: 1, value: 'Passive' },
+    { id: 2, value: 'Option 2' },
+  ],
+  countryOpts: [
+    { id: 1, value: 'USA' },
+    { id: 2, value: 'Other' },
+  ],
+  accountTypeOpts: [
+    { id: 1, value: 'Value' },
+    { id: 2, value: 'Option 2' },
+  ],
+  currencyOpts: [
+    { id: 1, value: 'US Dollar' },
+    { id: 2, value: 'Other' },
+  ],
+  dmpsOpts: [
+    { id: 1, value: 'dMPS' },
+    { id: 2, value: 'pMPS' },
   ],
   exceptionTypes: []
 };
