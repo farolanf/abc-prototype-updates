@@ -53,7 +53,8 @@ class UsersManagement extends Component {
       status: statuses.ACTIVE,
       teamName: '',
       selectedUser: null,
-      filters: {}
+      filters: {},
+      userGraphExpanded: false
     }
     this.tables = {};
   }
@@ -221,13 +222,15 @@ class UsersManagement extends Component {
 
   render() {
     const { lookup, users, blockUser} = this.props;
-    const { currentTab, keyword, errors, email, role, status, teamName, roleToUpdate, selectedUser} = this.state;
+    const { currentTab, keyword, errors, email, role, status, teamName, roleToUpdate, selectedUser, userGraphExpanded} = this.state;
 
     return (
       <div className="subpage user-management">
         <header className="page-header">
           <h2 className="page-title">Users Management</h2>
         </header>
+
+        <h3 className="user-graph">USER GRAPH<i className={`expand-icon ${userGraphExpanded ? 'alt' : ''}`} onClick={() => this.setState({ userGraphExpanded: !userGraphExpanded })} /></h3>
 
         <div className="table-view-opts">
           <ul className="list">

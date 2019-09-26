@@ -51,6 +51,27 @@
     }
   }
 
+  .user-graph {
+    margin-top: 12px;
+    font-size: 20px;
+
+    .expand-icon {
+      cursor: pointer;
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin: 0 22px;
+      border-radius: 50%;
+      background: $rich-electric-blue url("../../i/toogle-arrow.svg") 0 0 no-repeat;
+      background-size: 16px;
+      transform: none;
+
+      &.alt {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
   .title-alt {
     font-size: 20px;
     line-height: 26px;
