@@ -46,7 +46,7 @@
     "read-chunk": "^2.1.0",
     "saml-idp": "^1.1.0",
     "saml2-js": "^2.0.3",
-    "sequelize": "^4.37.10",
+    "sequelize": "^5.15.1",
     "simple-encryptor": "^1.4.0",
     "tedious": "^2.6",
     "uuid": "^3.3.2",
