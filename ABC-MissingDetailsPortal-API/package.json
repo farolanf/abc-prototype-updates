@@ -45,7 +45,7 @@
     "pug": "^2.0.3",
     "read-chunk": "^2.1.0",
     "saml-idp": "^1.1.0",
-    "saml2-js": "^2.0.3",
+    "saml2-js": "^2.0.5",
     "sequelize": "^4.37.10",
     "simple-encryptor": "^1.4.0",
     "tedious": "^2.6",
