@@ -44,7 +44,7 @@
     "react": "^16.2.0",
     "react-autosuggest": "^9.3.4",
     "react-datepicker": "^1.5.0",
-    "react-dev-utils": "^5.0.0",
+    "react-dev-utils": "^11.0.4",
     "react-dom": "^16.2.0",
     "react-dropzone": "^4.2.13",
     "react-js-pagination": "git+https://github.com/vayser/react-js-pagination.git",
