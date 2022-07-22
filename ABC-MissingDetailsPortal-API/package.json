@@ -30,7 +30,7 @@
     "exceljs": "^1.6.3",
     "express": "^4.16",
     "express-session": "^1.15.6",
-    "file-type": "^8.1.0",
+    "file-type": "^16.5.4",
     "fs-extra": "^7.0.0",
     "get-parameter-names": "^0.3.0",
     "helmet": "^3.13.0",
